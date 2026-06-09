@@ -1,0 +1,42 @@
+{
+  "name": "playwright-ts",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:dev": "ENV=dev playwright test",
+    "test:staging": "ENV=staging playwright test",
+    "test:prod": "ENV=prod playwright test",
+    "test:chrome": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:regression": "playwright test --grep @regression",
+    "test:api": "playwright test --grep @api",
+    "test:a11y": "playwright test --grep @a11y",
+    "test:visual": "playwright test src/tests/visual/visual.test.ts",
+    "test:visual:update": "playwright test src/tests/visual/visual.test.ts --update-snapshots",
+    "test:unit": "playwright test --grep @unit",
+    "report": "playwright show-report playwright-report",
+    "allure:generate": "allure generate allure-results --clean -o allure-report",
+    "allure:serve": "allure serve allure-results"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
+    "@faker-js/faker": "^9.9.0",
+    "@playwright/test": "^1.60.0",
+    "@types/dotenv": "^6.1.1",
+    "@types/node": "^25.9.2",
+    "allure-commandline": "^2.42.0",
+    "allure-playwright": "^3.9.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
+  }
+}

@@ -1,0 +1,13 @@
+.auth/
+node_modules/
+dist/
+allure-results/
+allure-report/
+playwright-report/
+test-results/
+*-snapshots/
+!src/tests/visual/**-snapshots/
+.env.local
+.env.dev
+.env.staging
+.env.prod

@@ -1,0 +1,198 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options: [dev, staging, prod]
+      test_suite:
+        description: 'Test suite to run'
+        required: true
+        default: 'smoke'
+        type: choice
+        options: [smoke, regression, api, a11y, visual, unit, all]
+      browser:
+        description: 'Browser'
+        required: true
+        default: 'chromium'
+        type: choice
+        options: [chromium, firefox, all]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  test:
+    name: '${{ github.event_name == ''workflow_dispatch'' && inputs.test_suite || (github.event_name == ''push'' && ''regression'' || ''smoke'') }} | ${{ github.event_name == ''workflow_dispatch'' && inputs.browser || ''chromium'' }} | ${{ github.event_name == ''workflow_dispatch'' && inputs.environment || ''staging'' }}'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps
+
+      - name: Install browser system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps
+
+      - name: Resolve environment config
+        id: env-config
+        env:
+          BASE_URL_DEV:      ${{ secrets.BASE_URL_DEV }}
+          BASE_URL_STAGING:  ${{ secrets.BASE_URL_STAGING }}
+          BASE_URL_PROD:     ${{ secrets.BASE_URL_PROD }}
+          SAUCE_URL_DEV:     ${{ secrets.SAUCE_URL_DEV }}
+          SAUCE_URL_STAGING: ${{ secrets.SAUCE_URL_STAGING }}
+          SAUCE_URL_PROD:    ${{ secrets.SAUCE_URL_PROD }}
+        run: |
+          ENV_NAME="${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'staging' }}"
+          echo "ENV=${ENV_NAME}" >> $GITHUB_ENV
+
+          echo "HEADLESS=true" >> $GITHUB_ENV
+
+          case "$ENV_NAME" in
+            dev)
+              echo "BASE_URL=${BASE_URL_DEV}"   >> $GITHUB_ENV
+              echo "SAUCE_URL=${SAUCE_URL_DEV}" >> $GITHUB_ENV
+              echo "TIMEOUT=30000"              >> $GITHUB_ENV
+              ;;
+            prod)
+              echo "BASE_URL=${BASE_URL_PROD}"   >> $GITHUB_ENV
+              echo "SAUCE_URL=${SAUCE_URL_PROD}" >> $GITHUB_ENV
+              echo "TIMEOUT=60000"               >> $GITHUB_ENV
+              ;;
+            *)
+              echo "BASE_URL=${BASE_URL_STAGING}"   >> $GITHUB_ENV
+              echo "SAUCE_URL=${SAUCE_URL_STAGING}" >> $GITHUB_ENV
+              echo "TIMEOUT=60000"                  >> $GITHUB_ENV
+              ;;
+          esac
+
+          SUITE="${{ github.event_name == 'workflow_dispatch' && inputs.test_suite || (github.event_name == 'push' && 'regression' || 'smoke') }}"
+          BROWSER="${{ github.event_name == 'workflow_dispatch' && inputs.browser || 'chromium' }}"
+
+          CMD="npx playwright test"
+          if [ "$SUITE" != "all" ]; then
+            case "$SUITE" in
+              visual) CMD="$CMD src/tests/visual/visual.test.ts" ;;
+              *)      CMD="$CMD --grep @${SUITE}" ;;
+            esac
+          fi
+          [ "$BROWSER" != "all" ] && CMD="$CMD --project=${BROWSER}"
+
+          echo "cmd=${CMD}" >> $GITHUB_OUTPUT
+
+      - name: Run tests
+        run: ${{ steps.env-config.outputs.cmd }}
+        env:
+          CI: true
+          SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+          SAUCE_PASSWORD: ${{ secrets.SAUCE_PASSWORD }}
+
+      - name: Upload Playwright HTML report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload test results (JUnit)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: junit-results-${{ github.run_id }}
+          path: test-results/junit.xml
+          retention-days: 14
+
+      - name: Upload failure artifacts
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: failure-artifacts-${{ github.run_id }}
+          path: |
+            test-results/
+            !test-results/junit.xml
+          retention-days: 7
+
+      - name: Publish test summary
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Playwright Test Results
+          path: test-results/junit.xml
+          reporter: java-junit
+          fail-on-error: false
+
+  allure-report:
+    name: Allure Report
+    runs-on: ubuntu-latest
+    needs: test
+    if: always()
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download Playwright report artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: playwright-report/
+
+      - name: Install Allure CLI
+        run: npm install -g allure-commandline --save-dev
+
+      - name: Generate Allure report
+        run: |
+          if [ -d "allure-results" ] && [ "$(ls -A allure-results)" ]; then
+            allure generate allure-results --clean -o allure-report
+          else
+            echo "No allure-results found, skipping report generation"
+          fi
+
+      - name: Upload Allure report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-report-${{ github.run_id }}
+          path: allure-report/
+          retention-days: 14
