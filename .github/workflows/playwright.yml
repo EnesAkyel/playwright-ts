@@ -34,6 +34,9 @@ jobs:
     name: '${{ github.event_name == ''workflow_dispatch'' && inputs.test_suite || (github.event_name == ''push'' && ''regression'' || ''smoke'') }} | ${{ github.event_name == ''workflow_dispatch'' && inputs.browser || ''chromium'' }} | ${{ github.event_name == ''workflow_dispatch'' && inputs.environment || ''staging'' }}'
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    permissions:
+      checks: write
+      contents: read
 
     steps:
       - name: Checkout
