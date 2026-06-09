@@ -20,7 +20,7 @@ test.describe('Visual Regression Tests', { tag: ['@visual', '@regression'] }, ()
         await homePage.page.waitForLoadState('networkidle');
         await VisualHelper.compareElement(
             homePage.page,
-            'h1',
+            'h1:has-text("JSONPlaceholder")',
             'jsonplaceholder-main-heading'
         );
     });
