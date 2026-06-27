@@ -22,7 +22,8 @@ test.describe('SauceDemo - Multi-Tab / Popup Handling', { tag: ['@regression'] }
         ]);
 
         await popup.waitForLoadState('domcontentloaded');
-        expect(popup.url()).toContain('twitter.com');
+        // Twitter rebranded to X; the link redirects to x.com
+        expect(popup.url()).toMatch(/twitter\.com|x\.com/);
         await popup.close();
     });
 
