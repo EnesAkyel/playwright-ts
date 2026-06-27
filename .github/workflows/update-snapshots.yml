@@ -1,6 +1,8 @@
 name: Update Visual Snapshots
 
 on:
+  push:
+    branches: [SDET-3]
   workflow_dispatch: {}
 
 jobs:
