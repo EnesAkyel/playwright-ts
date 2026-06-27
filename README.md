@@ -5,49 +5,50 @@
 ![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)
 
-End-to-end and API test suite for [SauceDemo](https://www.saucedemo.com) and [JSONPlaceholder](https://jsonplaceholder.typicode.com), built with Playwright and TypeScript. Covers E2E flows, API + UI hybrid tests, accessibility scanning, and visual regression, with Allure reporting and GitHub Actions CI.
+End-to-end, API, accessibility, visual regression, and performance test suite for [SauceDemo](https://www.saucedemo.com) and [JSONPlaceholder](https://jsonplaceholder.typicode.com), built with Playwright and TypeScript.
 
 ---
 
 ## Table of Contents
 
-- [Framework Architecture](#-framework-architecture)
-- [Tech Stack](#-tech-stack)
-- [Project Structure](#-project-structure)
-- [Test Coverage](#-test-coverage)
-- [Getting Started](#-getting-started)
-- [Running Tests](#-running-tests)
-- [Allure Reports](#-allure-reports)
-- [CI/CD](#-cicd)
-- [Design Patterns](#-design-patterns)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Test Coverage](#test-coverage)
+- [Getting Started](#getting-started)
+- [Running Tests](#running-tests)
+- [Reports](#reports)
+- [CI/CD](#cicd)
+- [Design Decisions](#design-decisions)
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                    Test Layer                        │
-│  E2E Tests │ API+UI Tests │ A11y Tests │ Visual Tests│
-└───────────────────────┬─────────────────────────────┘
-                        │
-┌───────────────────────▼─────────────────────────────┐
-│                  Fixtures Layer                      │
-│         Dependency Injection via Playwright          │
-│         Fixtures (LoginPage, InventoryPage...)       │
-└───────────────────────┬─────────────────────────────┘
-                        │
-┌───────────────────────▼─────────────────────────────┐
-│               Page Object Layer                      │
-│    BasePage │ HomePage │ LoginPage │ InventoryPage   │
-│             │ CartPage │ CheckoutPage                │
-└───────────────────────┬─────────────────────────────┘
-                        │
-┌───────────────────────▼─────────────────────────────┐
-│                 Utilities Layer                      │
-│  ApiClient │ DataFactory │ AccessibilityHelper       │
-│  VisualHelper │ DebugHelper │ ENV Config             │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                          Test Layer                             │
+│  E2E │ Checkout Validation │ Cart │ Popup │ API+UI │ A11y │     │
+│  Keyboard │ Performance │ Visual │ Network │ Auth │ Unit        │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+┌───────────────────────────▼─────────────────────────────────────┐
+│                       Fixtures Layer                            │
+│         Playwright test.extend() — dependency injection         │
+│         for page objects, API client, and auth state            │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+┌───────────────────────────▼─────────────────────────────────────┐
+│                    Page Object Layer                            │
+│  BasePage │ HomePage │ LoginPage │ InventoryPage                │
+│  CartPage │ CheckoutPage                                        │
+└───────────────────────────┬─────────────────────────────────────┘
+                            │
+┌───────────────────────────▼─────────────────────────────────────┐
+│                      Utilities Layer                            │
+│  ApiClient │ DataFactory │ AccessibilityHelper │ VisualHelper   │
+│  SummaryReporter │ DebugHelper │ ENV Config                     │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -56,11 +57,11 @@ End-to-end and API test suite for [SauceDemo](https://www.saucedemo.com) and [JS
 
 | Tool | Purpose |
 |---|---|
-| [Playwright](https://playwright.dev) | Browser automation |
+| [Playwright](https://playwright.dev) | Browser automation + API testing |
 | [TypeScript](https://www.typescriptlang.org) | Type-safe test code |
 | [Faker.js](https://fakerjs.dev) | Dynamic test data generation |
-| [axe-core](https://github.com/dequelabs/axe-core) | Accessibility testing |
-| [Allure](https://docs.qameta.io/allure/) | HTML test reporting |
+| [axe-core](https://github.com/dequelabs/axe-core) | Accessibility scanning |
+| [Allure](https://docs.qameta.io/allure/) | Rich HTML reporting with history |
 | [GitHub Actions](https://github.com/features/actions) | CI/CD pipeline |
 
 ---
@@ -70,34 +71,54 @@ End-to-end and API test suite for [SauceDemo](https://www.saucedemo.com) and [JS
 ```
 playwright-ts/
 ├── src/
-│   ├── pages/                  # Page Object Model classes
-│   │   ├── BasePage.ts         # Shared page methods
-│   │   ├── HomePage.ts         # JSONPlaceholder home page
-│   │   └── saucedemo/          # SauceDemo page objects
+│   ├── pages/                       # Page Object Model
+│   │   ├── BasePage.ts              # Shared navigation + wait methods
+│   │   ├── HomePage.ts
+│   │   └── saucedemo/
 │   │       ├── LoginPage.ts
 │   │       ├── InventoryPage.ts
 │   │       ├── CartPage.ts
 │   │       └── CheckoutPage.ts
-│   ├── tests/                  # Test suites
-│   │   ├── accessibility/      # Accessibility tests
-│   │   ├── combined/           # API + UI combined tests
-│   │   ├── saucedemo/          # E2E tests
-│   │   ├── unit/               # Utility unit tests
-│   │   ├── visual/             # Visual regression tests
-│   │   └── homepage.test.ts    # JSONPlaceholder UI smoke tests
-│   └── utils/                  # Utilities and helpers
-│       ├── apiClient.ts        # REST API client
+│   ├── reporters/
+│   │   └── SummaryReporter.ts       # Custom reporter — duration table + summary.json
+│   ├── tests/
+│   │   ├── accessibility/
+│   │   │   └── accessibility.test.ts  # axe-core scans + keyboard navigation
+│   │   ├── combined/
+│   │   │   └── apiAndUi.test.ts       # API + UI hybrid tests
+│   │   ├── network/
+│   │   │   └── networkMocking.test.ts # Request interception + mocking
+│   │   ├── performance/
+│   │   │   └── performance.test.ts    # Navigation timing + JS heap budgets
+│   │   ├── saucedemo/
+│   │   │   ├── e2e.test.ts            # E2E checkout + cart removal
+│   │   │   ├── checkout-validation.test.ts  # Negative form validation
+│   │   │   ├── login.test.ts
+│   │   │   ├── popup.test.ts          # Multi-tab / popup handling
+│   │   │   └── authPersistence.test.ts
+│   │   ├── setup/
+│   │   │   └── auth.setup.ts          # One-time auth state capture
+│   │   ├── unit/
+│   │   │   └── dataFactory.test.ts
+│   │   ├── visual/
+│   │   │   └── visual.test.ts         # Screenshot baseline comparison
+│   │   └── homepage.test.ts
+│   └── utils/
+│       ├── apiClient.ts               # Typed REST client
 │       ├── accessibilityHelper.ts
-│       ├── dataFactory.ts      # Faker-based test data
-│       ├── debugHelper.ts      # Debugging utilities
-│       ├── env.ts              # Environment config
-│       ├── fixtures.ts         # Playwright fixtures
-│       └── visualHelper.ts     # Screenshot comparison
-├── .env.dev                    # Dev environment config
-├── .env.staging                # Staging environment config
-├── .env.prod                   # Prod environment config
-├── playwright.config.ts        # Playwright configuration
-├── tsconfig.json               # TypeScript configuration
+│       ├── dataFactory.ts             # Faker-based builders
+│       ├── debugHelper.ts
+│       ├── env.ts                     # Multi-env config with validation
+│       ├── fixtures.ts                # Playwright fixture definitions
+│       └── visualHelper.ts
+├── .github/workflows/
+│   ├── playwright.yml                 # PR + push: full regression on Chromium
+│   ├── scheduled.yml                  # Nightly regression on Chromium + Firefox
+│   └── update-snapshots.yml           # Manual: regenerate Linux visual baselines
+├── .env.dev / .env.staging / .env.prod
+├── .nvmrc                             # Node 24
+├── playwright.config.ts
+├── tsconfig.json
 └── package.json
 ```
 
@@ -105,30 +126,60 @@ playwright-ts/
 
 ## Test Coverage
 
-### E2E Tests — SauceDemo
-- ✅ Login with valid credentials
-- ✅ Login error handling (invalid, empty credentials)
-- ✅ Product inventory display and sorting
-- ✅ Add single and multiple items to cart
-- ✅ Full checkout flow (login → cart → shipping → confirmation)
+### E2E — SauceDemo (`@e2e @regression`)
+- Full checkout flow with `test.step()` for structured reporting
+- Smoke test using `expect.soft()` across multiple UI landmarks
+- Product sorting (price low→high, high→low)
+- Add single and multiple items to cart
 
-### API + UI Combined Tests
-- ✅ API returns expected data and UI loads successfully
-- ✅ Create, update, and delete posts via API
-- ✅ Fetch user and validate their posts
-- ✅ Validate all endpoints return HTTP 200
-- ✅ Parallel post creation with data integrity checks
+### Checkout Validation (`@regression`)
+- Empty form submission — error message assertion
+- Missing last name and missing zip code errors
+- Error clears after correcting fields
+- Continue shopping navigation flow
 
-### Accessibility Tests
-- ✅ Critical violation detection on all pages
-- ✅ Serious violation detection
-- ✅ Element-level accessibility scanning
-- ✅ Known violation exclusion with documentation
+### Cart Item Removal (`@regression`)
+- Remove single item — badge disappears
+- Badge decrements when one of many items removed
+- `expect().toPass()` polling for async badge state
+- Re-add item after removal
+- Cart contents verified after partial removal
 
-### Visual Regression Tests
-- ✅ Full page screenshot comparison
-- ✅ Element-level screenshot comparison
-- ✅ Baseline management
+### Multi-Tab / Popup (`@regression`)
+- `page.waitForEvent('popup')` for Twitter / Facebook / LinkedIn footer links
+- Original page state preserved after popup closes
+
+### API + UI Combined (`@regression`)
+- Validate API responses and UI state in a single test
+- Create, update, fetch posts via JSONPlaceholder API
+- Endpoint health check across all resources
+
+### Network Mocking (`@regression`)
+- Mock GET /posts with synthetic data
+- Intercept POST body and assert payload
+- Simulate 500 and 404 responses
+- Block analytics requests
+- Add artificial latency
+
+### Accessibility (`@a11y @regression`)
+- axe-core scans on all pages with impact-level filtering
+- Known violation exclusion with documented rationale
+- Keyboard Tab order through login form
+- Keyboard-only login flow (no mouse)
+
+### Performance (`@performance @regression`)
+- `performance.getEntriesByType('navigation')` — DOMContentLoaded and load budgets
+- `performance.memory` — JS heap size budget (Chromium)
+- End-to-end checkout duration threshold
+
+### Visual Regression (`@visual @regression`)
+- Full-page and element-level baseline comparison
+- OS-specific baselines (darwin / linux)
+- `maxDiffPixelRatio` tolerance for rendering noise
+
+### Auth Persistence
+- Storagestate reuse — inventory loads without login
+- Session cookie validation
 
 ---
 
@@ -136,24 +187,36 @@ playwright-ts/
 
 ### Prerequisites
 
-- Node.js 18+
-- npm 9+
+- Node.js 24+
+- npm 10+
+
+```bash
+# Use the correct Node version (if using nvm)
+nvm use
+```
 
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/YOUR_USERNAME/playwright-ts.git
+git clone https://github.com/EnesAkyel/playwright-ts.git
 cd playwright-ts
 
-# Install dependencies
 npm install
-
-# Install Playwright browsers
 npx playwright install
+```
 
-# Copy environment file
-cp .env.dev .env
+### Environment Setup
+
+The framework resolves config by `ENV` variable (`dev` / `staging` / `prod`).  
+Local overrides go in `.env.local` (gitignored).
+
+```bash
+# .env.local
+BASE_URL=https://jsonplaceholder.typicode.com
+SAUCE_URL=https://www.saucedemo.com
+SAUCE_USERNAME=standard_user
+SAUCE_PASSWORD=secret_sauce
+TIMEOUT=30000
 ```
 
 ---
@@ -161,37 +224,36 @@ cp .env.dev .env
 ## Running Tests
 
 ```bash
-# Run all tests
+# All tests
 npm test
 
-# Run against a specific environment
+# By environment
 npm run test:dev
 npm run test:staging
 npm run test:prod
 
-# Run by tag
-npm run test:smoke        # @smoke — quick sanity on every commit
-npm run test:regression   # @regression — full suite
-npm run test:api          # @api — API tests only
-npm run test:a11y         # @a11y — accessibility tests only
-npm run test:unit         # @unit — utility unit tests
+# By tag
+npm run test:smoke        # Quick sanity — runs on every commit
+npm run test:regression   # Full suite
+npm run test:api          # API tests only
+npm run test:a11y         # Accessibility tests only
+npm run test:unit         # Unit tests only
 
-# Run a specific test suite
-npx playwright test src/tests/saucedemo/
-npx playwright test src/tests/accessibility/
-npx playwright test src/tests/combined/
-
-# Run on a specific browser
+# By browser
 npm run test:chrome
 npm run test:firefox
 
-# Run a specific test by name
+# Specific suite
+npx playwright test src/tests/saucedemo/
+npx playwright test src/tests/performance/
+
+# By name
 npx playwright test -g "should complete full checkout flow"
 
-# Run in headed mode (see the browser)
+# Headed (watch the browser)
 npm run test:headed
 
-# Update visual regression baselines
+# Update visual baselines (local)
 npm run test:visual:update
 ```
 
@@ -199,53 +261,74 @@ npm run test:visual:update
 
 ## Reports
 
-Three reporters run on every test execution:
+Four reporters run on every test execution:
 
 | Reporter | Output | Purpose |
 |---|---|---|
 | Playwright HTML | `playwright-report/` | Interactive local report — `npm run report` |
-| JUnit XML | `test-results/junit.xml` | CI dashboard integration (GitHub Actions, Jenkins) |
-| Allure | `allure-results/` | Rich history + trends report |
+| JUnit XML | `test-results/junit.xml` | CI dashboard integration |
+| Allure | `allure-results/` | Rich history + trends + severity breakdown |
+| SummaryReporter | `test-results/summary.json` | Duration table, top 5 slowest tests, console summary |
 
 ```bash
-# Open Playwright HTML report (after any test run)
+# Playwright HTML report
 npm run report
 
-# Generate and open Allure report
+# Allure report
 npm run allure:generate
 npm run allure:serve
 ```
+
+Allure reports include `epic`, `feature`, `story`, and `severity` labels on every test for structured navigation.
 
 ---
 
 ## CI/CD
 
-Tests run automatically on every push and pull request via **GitHub Actions**:
+### `playwright.yml` — PR and push
+- Triggers on every pull request and push to `main`
+- Runs full `@regression` suite on Chromium
+- Uploads HTML report and JUnit XML as artifacts
+- Generates Allure report as a separate job
 
-- Runs on `ubuntu-latest`
-- Executes against Chromium and Firefox
-- `retries: 2` and `workers: 2` in CI; `retries: 0` locally
-- Uploads Playwright HTML report and JUnit XML as build artifacts
-- Supports environment-based configuration
+### `scheduled.yml` — Nightly regression
+- Runs at 02:00 UTC daily
+- Matrix: Chromium + Firefox
+- Creates a GitHub issue on failure for visibility
+
+### `update-snapshots.yml` — Manual baseline update
+- Triggered manually from the Actions tab
+- Generates Linux visual baselines on `ubuntu-latest`
+- Uploads snapshots as a downloadable artifact to commit into the repo
 
 ---
 
 ## Design Decisions
 
-**Page Object Model** — locators and actions live in page classes; tests only call methods, never touch selectors directly.
+**Page Object Model** — locators and actions live in page classes; tests call methods, never touch selectors directly. Keeps tests readable and locators maintainable in one place.
 
-**Fixture-based DI** — `test.extend()` wires up page objects so each test declares what it needs without any setup boilerplate.
+**Fixture-based DI** — `test.extend()` wires up page objects so each test declares what it needs with no setup boilerplate. Fixtures compose cleanly for complex scenarios.
 
-**DataFactory** — Faker.js generates unique test data per run; no hardcoded strings that silently break on env changes.
+**DataFactory** — Faker.js generates unique test data per run. No hardcoded strings that silently break across environments or parallel runs.
 
-**Multi-env config** — `.env.dev / .staging / .prod` swap the base URLs so the same suite runs on any environment with one flag.
+**Multi-env config** — `.env.dev / .staging / .prod` swap URLs with one flag. `.env.local` allows personal overrides without touching shared config.
 
-**ApiClient wrapper** — thin class around Playwright's `APIRequestContext` keeps API calls out of test bodies and makes hybrid tests readable.
+**Soft assertions** — `expect.soft()` in smoke tests lets all checks run before failing, giving a complete picture of what's broken in a single pass.
+
+**test.step()** — complex flows are broken into named steps that surface in Allure and HTML reports, making failure diagnosis faster.
+
+**expect().toPass()** — used instead of manual `waitForFunction` for async state polling. Cleaner and respects Playwright's retry-ability model.
+
+**Custom SummaryReporter** — prints a duration table and top 5 slowest tests to stdout and writes `test-results/summary.json`. Useful for spotting performance regressions in CI logs without opening the full report.
+
+**Visual regression strategy** — OS-specific baselines (`-darwin.png`, `-linux.png`) committed per platform. Full-page screenshots use `maxDiffPixelRatio` tolerance for rendering noise; element screenshots use a tighter `maxDiffPixels` budget.
+
+**ApiClient wrapper** — thin class around Playwright's `APIRequestContext`. Keeps API calls out of test bodies and makes hybrid API + UI tests readable.
 
 ---
 
 ## Author
 
-**Enes Akyel**  
-SDET | QA Automation Engineer  
+**Enes Akyel**
+SDET | QA Automation Engineer
 [LinkedIn](https://www.linkedin.com/in/enes-akyel-2a77a7122/) • [GitHub](https://github.com/EnesAkyel)

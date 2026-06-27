@@ -21,6 +21,9 @@
     "allure:generate": "allure generate allure-results --clean -o allure-report",
     "allure:serve": "allure serve allure-results"
   },
+  "engines": {
+    "node": ">=24"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
