@@ -27,27 +27,27 @@ End-to-end, API, accessibility, visual regression, and performance test suite fo
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                          Test Layer                              │
+│                          Test Layer                             │
 │  E2E │ Checkout Validation │ Cart │ Popup │ API+UI │ A11y │     │
 │  Keyboard │ Performance │ Visual │ Network │ Auth │ Unit        │
 └───────────────────────────┬─────────────────────────────────────┘
                             │
 ┌───────────────────────────▼─────────────────────────────────────┐
-│                       Fixtures Layer                             │
-│         Playwright test.extend() — dependency injection          │
+│                       Fixtures Layer                            │
+│         Playwright test.extend() — dependency injection         │
 │         for page objects, API client, and auth state            │
 └───────────────────────────┬─────────────────────────────────────┘
                             │
 ┌───────────────────────────▼─────────────────────────────────────┐
-│                    Page Object Layer                              │
-│  BasePage │ HomePage │ LoginPage │ InventoryPage                 │
-│  CartPage │ CheckoutPage                                         │
+│                    Page Object Layer                            │
+│  BasePage │ HomePage │ LoginPage │ InventoryPage                │
+│  CartPage │ CheckoutPage                                        │
 └───────────────────────────┬─────────────────────────────────────┘
                             │
 ┌───────────────────────────▼─────────────────────────────────────┐
-│                      Utilities Layer                              │
-│  ApiClient │ DataFactory │ AccessibilityHelper │ VisualHelper    │
-│  SummaryReporter │ DebugHelper │ ENV Config                      │
+│                      Utilities Layer                            │
+│  ApiClient │ DataFactory │ AccessibilityHelper │ VisualHelper   │
+│  SummaryReporter │ DebugHelper │ ENV Config                     │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
