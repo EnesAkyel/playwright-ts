@@ -48,8 +48,8 @@ test.describe('JSONPlaceholder Homepage', { tag: ['@smoke'] }, () => {
         expect.soft(await homePage.isSubHeadingVisible()).toBeTruthy();
         await expect.soft(homePage.page.locator('nav')).toBeVisible();
         await expect.soft(homePage.page.locator('footer')).toBeVisible();
-        await expect.soft(homePage.page.locator('a[href*="posts"]')).toBeVisible();
-        await expect.soft(homePage.page.locator('a[href*="todos"]')).toBeVisible();
+        await expect.soft(homePage.page.locator('a[href*="posts"]').first()).toBeVisible();
+        await expect.soft(homePage.page.locator('a[href*="todos"]').first()).toBeVisible();
     });
 
 });
