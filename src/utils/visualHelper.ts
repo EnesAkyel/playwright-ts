@@ -15,7 +15,7 @@ export class VisualHelper {
     ): Promise<void> {
         await expect(page).toHaveScreenshot(`${snapshotName}.png`, {
             fullPage: options.fullPage ?? true,
-            maxDiffPixels: options.maxDiffPixels ?? 500,
+            maxDiffPixelRatio: options.maxDiffPixelRatio ?? 0.03,
             threshold: options.threshold ?? 0.2,
         });
     }
