@@ -8,9 +8,12 @@ test.describe('Visual Regression Tests', { tag: ['@visual', '@regression'] }, ()
                                                                       homePage,
                                                                   }) => {
         await homePage.page.waitForLoadState('networkidle');
+        // the homepage has dynamic content below the fold
+        // that causes non-deterministic page heights between runs
         await VisualHelper.compareFullPage(
             homePage.page,
-            'jsonplaceholder-homepage'
+            'jsonplaceholder-homepage',
+            { fullPage: false }
         );
     });
 
