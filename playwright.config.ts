@@ -11,6 +11,7 @@ export default defineConfig({
         ['html', { outputFolder: 'playwright-report', open: 'never' }],
         ['junit', { outputFile: 'test-results/junit.xml' }],
         ['allure-playwright', { outputFolder: 'allure-results' }],
+        ['./src/reporters/SummaryReporter.ts'],
     ],
     use: {
         headless: ENV.headless,

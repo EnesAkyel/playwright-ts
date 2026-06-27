@@ -32,6 +32,18 @@ export class CheckoutPage extends BasePage {
         await this.zipCodeInput.fill(user.address.zipCode);
     }
 
+    async fillFirstName(value: string) {
+        await this.firstNameInput.fill(value);
+    }
+
+    async fillLastName(value: string) {
+        await this.lastNameInput.fill(value);
+    }
+
+    async fillZipCode(value: string) {
+        await this.zipCodeInput.fill(value);
+    }
+
     async continue() {
         await this.continueButton.click();
     }
