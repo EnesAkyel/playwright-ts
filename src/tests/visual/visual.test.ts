@@ -2,7 +2,7 @@ import { test } from '../../utils/fixtures';
 import { VisualHelper } from '../../utils/visualHelper';
 import { DataFactory } from '../../utils/dataFactory';
 
-test.describe('Visual Regression Tests', { tag: ['@visual'] }, () => {
+test.describe('Visual Regression Tests', { tag: ['@visual', '@regression'] }, () => {
 
     test('JSONPlaceholder homepage should match baseline', async ({
                                                                       homePage,
