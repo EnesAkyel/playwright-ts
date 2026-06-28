@@ -301,9 +301,10 @@ Allure reports include `epic`, `feature`, `story`, and `severity` labels on ever
 
 ### `playwright.yml` — PR and push
 - Triggers on every pull request and push to `main`
-- Runs full `@regression` suite on Chromium
-- Uploads HTML report and JUnit XML as artifacts
-- Generates Allure report as a separate job
+- `lint` job runs ESLint + Prettier check first. Blocks tests on failure
+- `test` job splits the `@regression` suite across **3 parallel shards** on Chromium
+- Each shard uploads its own Allure results and JUnit XML as artifacts
+- `allure-report` job merges all shard results, restores history from the previous run for trend charts, and uploads the generated report
 
 ### `scheduled.yml` — Nightly regression
 - Runs at 02:00 UTC daily
@@ -342,6 +343,14 @@ Allure reports include `epic`, `feature`, `story`, and `severity` labels on ever
 **ESLint + Prettier** — `eslint-plugin-playwright` enforces Playwright-specific best practices (prefer web-first assertions, no raw timeouts, no networkidle). `typescript-eslint` catches unused variables and unsafe `any` usage. Prettier enforces consistent formatting. Both run in CI via `npm run lint` and `npm run format:check`.
 
 **Visual tests isolated from regression** — screenshot comparisons are OS-sensitive and require committed baseline files. Running them in CI without matching baselines causes false failures. They run locally via `npm run test:visual` and baselines are regenerated manually via the `update-snapshots` workflow when intentional UI changes are made.
+
+**Global setup** — `src/utils/globalSetup.ts` runs before any test. It validates that `SAUCE_URL` and `BASE_URL` are set, then checks HTTP reachability for both sites. Tests never start if the environment is misconfigured.
+
+**`loggedInPage` fixture** — creates a fresh browser context with the persisted auth storageState (`.auth/sauce.json`) so tests can start directly on the inventory page without calling `loginPage.login()`. Requires the `auth-setup` project to have run first.
+
+**Test sharding** — the regression suite is split across 3 parallel machines in CI using `--shard=N/3`. Each shard runs independently and uploads its own results. The Allure job merges them into a single report.
+
+**Allure history trending** — the `allure-report` CI job downloads the `allure-history` artifact from the previous successful push to `main`, injects it into the current results before generating, and saves the new history back. This produces Allure's built-in trend charts (pass rate, duration, flakiness) across runs without external storage.
 
 ---
 

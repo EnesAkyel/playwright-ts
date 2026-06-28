@@ -3,6 +3,7 @@ import { ENV } from './src/utils/env';
 
 export default defineConfig({
     testDir: './src/tests',
+    globalSetup: './src/utils/globalSetup.ts',
     timeout: ENV.timeout,
     retries: process.env.CI ? 2 : 0,
     workers: process.env.CI ? 2 : undefined,
@@ -21,13 +22,11 @@ export default defineConfig({
         trace: 'on-first-retry',
     },
     projects: [
-        // ── Auth setup: logs in once and writes .auth/sauce.json ─────────────
         {
             name: 'auth-setup',
             testMatch: /.*auth\.setup\.ts/,
         },
 
-        // ── Standard projects: login per-test, skip auth-persistence suite ───
         {
             name: 'chromium',
             use: { ...devices['Desktop Chrome'] },
@@ -39,7 +38,6 @@ export default defineConfig({
             testIgnore: /.*authPersistence\.test\.ts/,
         },
 
-        // ── Authenticated project: reuses storageState, no per-test login ────
         {
             name: 'chromium-authenticated',
             use: {
