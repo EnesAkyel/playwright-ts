@@ -34,14 +34,18 @@ export class ApiClient {
         this.baseUrl = ENV.baseUrl;
     }
 
-    private async assertOk(response: Awaited<ReturnType<APIRequestContext['get']>>, context: string): Promise<void> {
+    private async assertOk(
+        response: Awaited<ReturnType<APIRequestContext['get']>>,
+        context: string,
+    ): Promise<void> {
         if (!response.ok()) {
             const body = await response.text().catch(() => '');
-            throw new Error(`${context} failed: HTTP ${response.status()} ${response.statusText()} — ${body}`);
+            throw new Error(
+                `${context} failed: HTTP ${response.status()} ${response.statusText()} — ${body}`,
+            );
         }
     }
 
-    // ── Posts ────────────────────────────────────────────────────────
     async getPosts(): Promise<ApiPost[]> {
         const response = await this.request.get(`${this.baseUrl}/posts`);
         await this.assertOk(response, 'GET /posts');
@@ -76,14 +80,11 @@ export class ApiClient {
     }
 
     async getPostsByUser(userId: number): Promise<ApiPost[]> {
-        const response = await this.request.get(
-            `${this.baseUrl}/posts?userId=${userId}`
-        );
+        const response = await this.request.get(`${this.baseUrl}/posts?userId=${userId}`);
         await this.assertOk(response, `GET /posts?userId=${userId}`);
         return response.json();
     }
 
-    // ── Users ────────────────────────────────────────────────────────
     async getUsers(): Promise<ApiUser[]> {
         const response = await this.request.get(`${this.baseUrl}/users`);
         await this.assertOk(response, 'GET /users');
@@ -96,16 +97,12 @@ export class ApiClient {
         return response.json();
     }
 
-    // ── Comments ─────────────────────────────────────────────────────
     async getCommentsByPost(postId: number): Promise<ApiComment[]> {
-        const response = await this.request.get(
-            `${this.baseUrl}/comments?postId=${postId}`
-        );
+        const response = await this.request.get(`${this.baseUrl}/comments?postId=${postId}`);
         await this.assertOk(response, `GET /comments?postId=${postId}`);
         return response.json();
     }
 
-    // ── Status helpers ───────────────────────────────────────────────
     async getPostStatus(id: number): Promise<number> {
         const response = await this.request.get(`${this.baseUrl}/posts/${id}`);
         return response.status();

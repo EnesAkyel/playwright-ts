@@ -3,7 +3,6 @@ import { DataFactory } from '../../utils/dataFactory';
 import { epic, feature, story, severity, Severity } from 'allure-js-commons';
 
 test.describe('SauceDemo - Multi-Tab / Popup Handling', { tag: ['@regression'] }, () => {
-
     test.beforeEach(async ({ loginPage, inventoryPage }) => {
         const user = DataFactory.createSauceUser();
         await loginPage.login(user.username, user.password);
@@ -59,7 +58,10 @@ test.describe('SauceDemo - Multi-Tab / Popup Handling', { tag: ['@regression'] }
         await popup.close();
     });
 
-    test('should retain original page state after closing popup', async ({ page, inventoryPage }) => {
+    test('should retain original page state after closing popup', async ({
+        page,
+        inventoryPage,
+    }) => {
         await epic('Social Links');
         await feature('External Links');
         await story('Page state preserved after popup closes');
@@ -78,5 +80,4 @@ test.describe('SauceDemo - Multi-Tab / Popup Handling', { tag: ['@regression'] }
         expect(await inventoryPage.getCartBadgeCount()).toBe(1);
         expect(await inventoryPage.getTitle()).toBe('Products');
     });
-
 });

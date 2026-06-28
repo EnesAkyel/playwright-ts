@@ -2,7 +2,6 @@ import { test, expect } from '../utils/fixtures';
 import { epic, feature, story, severity, Severity } from 'allure-js-commons';
 
 test.describe('JSONPlaceholder Homepage', { tag: ['@smoke'] }, () => {
-
     test('should load the homepage', async ({ homePage }) => {
         await epic('Homepage');
         await feature('Page Load');
@@ -51,5 +50,4 @@ test.describe('JSONPlaceholder Homepage', { tag: ['@smoke'] }, () => {
         await expect.soft(homePage.page.locator('a[href*="posts"]').first()).toBeVisible();
         await expect.soft(homePage.page.locator('a[href*="todos"]').first()).toBeVisible();
     });
-
 });

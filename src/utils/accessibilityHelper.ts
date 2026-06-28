@@ -17,10 +17,6 @@ export interface Violation {
 }
 
 export class AccessibilityHelper {
-
-    /**
-     * Run a full accessibility scan on the current page
-     */
     static async scanPage(page: Page): Promise<AccessibilityResult> {
         const results = await new AxeBuilder({ page }).analyze();
 
@@ -38,13 +34,8 @@ export class AccessibilityHelper {
         };
     }
 
-    /**
-     * Run accessibility scan on a specific element
-     */
     static async scanElement(page: Page, selector: string): Promise<AccessibilityResult> {
-        const results = await new AxeBuilder({ page })
-            .include(selector)
-            .analyze();
+        const results = await new AxeBuilder({ page }).include(selector).analyze();
 
         return {
             violations: results.violations.map(v => ({
@@ -60,16 +51,11 @@ export class AccessibilityHelper {
         };
     }
 
-    /**
-     * Run scan excluding known violations
-     */
     static async scanPageExcluding(
         page: Page,
-        excludeRules: string[]
+        excludeRules: string[],
     ): Promise<AccessibilityResult> {
-        const results = await new AxeBuilder({ page })
-            .disableRules(excludeRules)
-            .analyze();
+        const results = await new AxeBuilder({ page }).disableRules(excludeRules).analyze();
 
         return {
             violations: results.violations.map(v => ({
@@ -85,16 +71,13 @@ export class AccessibilityHelper {
         };
     }
 
-    /**
-     * Print a human-readable summary of violations
-     */
     static printViolations(result: AccessibilityResult): void {
         if (result.violations.length === 0) {
             console.log('\n✅ No accessibility violations found\n');
             return;
         }
 
-        console.log(`\n─── Accessibility Violations (${result.violations.length}) ───`);
+        console.log(`\n Accessibility Violations (${result.violations.length})`);
         result.violations.forEach(v => {
             console.log(`  [${v.impact?.toUpperCase()}] ${v.id}`);
             console.log(`    Description : ${v.description}`);
@@ -103,6 +86,6 @@ export class AccessibilityHelper {
             console.log(`    More info   : ${v.helpUrl}`);
             console.log();
         });
-        console.log('─────────────────────────────────────\n');
+        console.log('\n');
     }
 }

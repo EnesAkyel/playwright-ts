@@ -62,6 +62,8 @@ End-to-end, API, accessibility, visual regression, and performance test suite fo
 | [Faker.js](https://fakerjs.dev) | Dynamic test data generation |
 | [axe-core](https://github.com/dequelabs/axe-core) | Accessibility scanning |
 | [Allure](https://docs.qameta.io/allure/) | Rich HTML reporting with history |
+| [ESLint + typescript-eslint](https://typescript-eslint.io) | Static analysis with Playwright-specific rules |
+| [Prettier](https://prettier.io) | Opinionated code formatting |
 | [GitHub Actions](https://github.com/features/actions) | CI/CD pipeline |
 
 ---
@@ -117,6 +119,8 @@ playwright-ts/
 │   └── update-snapshots.yml           # Manual: regenerate Linux visual baselines
 ├── .env.dev / .env.staging / .env.prod
 ├── .nvmrc                             # Node 24
+├── eslint.config.mjs                  # ESLint 9 flat config with playwright + typescript rules
+├── .prettierrc                        # Formatting: 4-space indent, single quotes, trailing commas
 ├── playwright.config.ts
 ├── tsconfig.json
 └── package.json
@@ -172,10 +176,11 @@ playwright-ts/
 - `performance.memory` — JS heap size budget (Chromium)
 - End-to-end checkout duration threshold
 
-### Visual Regression (`@visual @regression`)
+### Visual Regression (`@visual`)
 - Full-page and element-level baseline comparison
 - OS-specific baselines (darwin / linux)
 - `maxDiffPixelRatio` tolerance for rendering noise
+- Excluded from CI regression — run locally or via the manual `update-snapshots` workflow
 
 ### Auth Persistence
 - Storagestate reuse — inventory loads without login
@@ -255,6 +260,15 @@ npm run test:headed
 
 # Update visual baselines (local)
 npm run test:visual:update
+
+# Visual tests only (excluded from regression suite)
+npm run test:visual
+
+# Code quality
+npm run lint          # ESLint
+npm run lint:fix      # ESLint with auto-fix
+npm run format        # Prettier
+npm run format:check  # Prettier check (CI-safe)
 ```
 
 ---
@@ -324,6 +338,10 @@ Allure reports include `epic`, `feature`, `story`, and `severity` labels on ever
 **Visual regression strategy** — OS-specific baselines (`-darwin.png`, `-linux.png`) committed per platform. Full-page screenshots use `maxDiffPixelRatio` tolerance for rendering noise; element screenshots use a tighter `maxDiffPixels` budget.
 
 **ApiClient wrapper** — thin class around Playwright's `APIRequestContext`. Keeps API calls out of test bodies and makes hybrid API + UI tests readable.
+
+**ESLint + Prettier** — `eslint-plugin-playwright` enforces Playwright-specific best practices (prefer web-first assertions, no raw timeouts, no networkidle). `typescript-eslint` catches unused variables and unsafe `any` usage. Prettier enforces consistent formatting. Both run in CI via `npm run lint` and `npm run format:check`.
+
+**Visual tests isolated from regression** — screenshot comparisons are OS-sensitive and require committed baseline files. Running them in CI without matching baselines causes false failures. They run locally via `npm run test:visual` and baselines are regenerated manually via the `update-snapshots` workflow when intentional UI changes are made.
 
 ---
 

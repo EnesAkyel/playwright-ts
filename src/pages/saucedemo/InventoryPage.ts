@@ -26,13 +26,15 @@ export class InventoryPage extends BasePage {
     }
 
     async addItemToCartByName(productName: string) {
-        const item = this.page.locator('[data-test="inventory-item"]')
+        const item = this.page
+            .locator('[data-test="inventory-item"]')
             .filter({ hasText: productName });
         await item.locator('button').click();
     }
 
     async removeItemFromCartByName(productName: string) {
-        const item = this.page.locator('[data-test="inventory-item"]')
+        const item = this.page
+            .locator('[data-test="inventory-item"]')
             .filter({ hasText: productName });
         await item.locator('button').click();
     }

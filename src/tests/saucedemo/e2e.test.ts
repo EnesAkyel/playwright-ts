@@ -3,24 +3,29 @@ import { DataFactory } from '../../utils/dataFactory';
 import { epic, feature, story, severity, Severity } from 'allure-js-commons';
 
 test.describe('SauceDemo - E2E Checkout Flow', { tag: ['@regression', '@e2e'] }, () => {
-
     test.beforeEach(async ({ loginPage, inventoryPage }) => {
         const user = DataFactory.createSauceUser();
         await loginPage.login(user.username, user.password);
         await expect(inventoryPage.page.locator('[data-test="title"]')).toBeVisible();
     });
 
-    test('smoke: key UI elements visible on inventory page', { tag: ['@smoke'] }, async ({ inventoryPage }) => {
-        await epic('Inventory');
-        await feature('Page Layout');
-        await severity(Severity.CRITICAL);
+    test(
+        'smoke: key UI elements visible on inventory page',
+        { tag: ['@smoke'] },
+        async ({ inventoryPage }) => {
+            await epic('Inventory');
+            await feature('Page Layout');
+            await severity(Severity.CRITICAL);
 
-        expect.soft(await inventoryPage.getTitle()).toBe('Products');
-        expect.soft(await inventoryPage.isCartBadgeVisible()).toBeFalsy();
-        expect.soft(await inventoryPage.getItemCount()).toBeGreaterThan(0);
-        await expect.soft(inventoryPage.page.locator('[data-test="product-sort-container"]')).toBeVisible();
-        await expect.soft(inventoryPage.page.locator('.footer_copy')).toBeVisible();
-    });
+            expect.soft(await inventoryPage.getTitle()).toBe('Products');
+            expect.soft(await inventoryPage.isCartBadgeVisible()).toBeFalsy();
+            expect.soft(await inventoryPage.getItemCount()).toBeGreaterThan(0);
+            await expect
+                .soft(inventoryPage.page.locator('[data-test="product-sort-container"]'))
+                .toBeVisible();
+            await expect.soft(inventoryPage.page.locator('.footer_copy')).toBeVisible();
+        },
+    );
 
     test('should display all products on inventory page', async ({ inventoryPage }) => {
         await epic('Inventory');
@@ -95,7 +100,9 @@ test.describe('SauceDemo - E2E Checkout Flow', { tag: ['@regression', '@e2e'] },
 
         await test.step('Navigate to cart and verify items', async () => {
             await inventoryPage.goToCart();
-            await expect(inventoryPage.page.locator('[data-test="inventory-item-desc"]')).toHaveCount(2);
+            await expect(
+                inventoryPage.page.locator('[data-test="inventory-item-desc"]'),
+            ).toHaveCount(2);
             expect(await cartPage.getTitle()).toBe('Your Cart');
             expect(await cartPage.getCartItemCount()).toBe(2);
         });
@@ -117,11 +124,9 @@ test.describe('SauceDemo - E2E Checkout Flow', { tag: ['@regression', '@e2e'] },
             expect(header).toBe('Thank you for your order!');
         });
     });
-
 });
 
 test.describe('SauceDemo - Cart Item Removal', { tag: ['@regression'] }, () => {
-
     test.beforeEach(async ({ loginPage, inventoryPage }) => {
         const user = DataFactory.createSauceUser();
         await loginPage.login(user.username, user.password);
@@ -178,7 +183,10 @@ test.describe('SauceDemo - Cart Item Removal', { tag: ['@regression'] }, () => {
         expect(await inventoryPage.getCartBadgeCount()).toBe(1);
     });
 
-    test('should preserve remaining items when removing one from multi-item cart', async ({ inventoryPage, cartPage }) => {
+    test('should preserve remaining items when removing one from multi-item cart', async ({
+        inventoryPage,
+        cartPage,
+    }) => {
         await epic('Cart');
         await feature('Remove from Cart');
         await severity(Severity.NORMAL);
@@ -196,5 +204,4 @@ test.describe('SauceDemo - Cart Item Removal', { tag: ['@regression'] }, () => {
         expect(names).toContain('Sauce Labs Bolt T-Shirt');
         expect(names).not.toContain('Sauce Labs Bike Light');
     });
-
 });

@@ -11,7 +11,7 @@ export class VisualHelper {
     static async compareFullPage(
         page: Page,
         snapshotName: string,
-        options: VisualOptions = {}
+        options: VisualOptions = {},
     ): Promise<void> {
         await expect(page).toHaveScreenshot(`${snapshotName}.png`, {
             fullPage: options.fullPage ?? true,
@@ -24,7 +24,7 @@ export class VisualHelper {
         page: Page,
         selector: string,
         snapshotName: string,
-        options: VisualOptions = {}
+        options: VisualOptions = {},
     ): Promise<void> {
         const element = page.locator(selector);
         await expect(element).toHaveScreenshot(`${snapshotName}.png`, {

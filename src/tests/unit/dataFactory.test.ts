@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 import { DataFactory } from '../../utils/dataFactory';
 
 test.describe('Data Factory', { tag: ['@unit'] }, () => {
-
     test('should create a valid user', () => {
         const user = DataFactory.createUser();
 
@@ -76,5 +75,4 @@ test.describe('Data Factory', { tag: ['@unit'] }, () => {
         expect(user.username).toBeTruthy();
         expect(user.password).toBeTruthy();
     });
-
 });
