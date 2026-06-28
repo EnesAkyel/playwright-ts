@@ -1,0 +1,19 @@
+services:
+  playwright:
+    build: .
+    ipc: host          # Chromium needs shared memory — avoids renderer crashes
+    shm_size: '2gb'
+    environment:
+      CI: 'true'
+      ENV: ${ENV:-staging}
+      BASE_URL: ${BASE_URL}
+      SAUCE_URL: ${SAUCE_URL}
+      SAUCE_USERNAME: ${SAUCE_USERNAME}
+      SAUCE_PASSWORD: ${SAUCE_PASSWORD}
+      HEADLESS: 'true'
+      TIMEOUT: ${TIMEOUT:-60000}
+    volumes:
+      # Mount output directories so results are accessible on the host after the run
+      - ./playwright-report:/app/playwright-report
+      - ./test-results:/app/test-results
+      - ./allure-results:/app/allure-results

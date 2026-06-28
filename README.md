@@ -121,6 +121,8 @@ playwright-ts/
 ├── .nvmrc                             # Node 24
 ├── eslint.config.mjs                  # ESLint 9 flat config with playwright + typescript rules
 ├── .prettierrc                        # Formatting: 4-space indent, single quotes, trailing commas
+├── Dockerfile                         # Node 24 + Playwright browsers — fully self-contained test runner
+├── docker-compose.yml                 # Mounts output dirs and injects env vars for local Docker runs
 ├── playwright.config.ts
 ├── tsconfig.json
 └── package.json
@@ -271,6 +273,27 @@ npm run format        # Prettier
 npm run format:check  # Prettier check (CI-safe)
 ```
 
+### Running with Docker
+
+```bash
+# Build the image
+docker compose build
+
+# Run the full regression suite (results land in playwright-report/ and allure-results/)
+docker compose --env-file .env.local run -T --rm playwright
+
+# Run a specific tag
+docker compose --env-file .env.local run -T --rm playwright npx playwright test --grep @smoke
+
+# Run a specific file
+docker compose --env-file .env.local run -T --rm playwright npx playwright test src/tests/performance/
+
+# Override browser
+docker compose --env-file .env.local run -T --rm playwright npx playwright test --project=firefox
+```
+
+`--env-file .env.local` feeds credentials to the container. `-T` disables pseudo-TTY allocation so output streams to the terminal correctly in non-interactive shells.
+
 ---
 
 ## Reports
@@ -351,6 +374,8 @@ Allure reports include `epic`, `feature`, `story`, and `severity` labels on ever
 **Test sharding** — the regression suite is split across 3 parallel machines in CI using `--shard=N/3`. Each shard runs independently and uploads its own results. The Allure job merges them into a single report.
 
 **Allure history trending** — the `allure-report` CI job downloads the `allure-history` artifact from the previous successful push to `main`, injects it into the current results before generating, and saves the new history back. This produces Allure's built-in trend charts (pass rate, duration, flakiness) across runs without external storage.
+
+**Docker** — `Dockerfile` uses `node:24-bookworm` and installs Playwright browsers via `--with-deps` so the image is fully self-contained. `PLAYWRIGHT_BROWSERS_PATH` is set outside `/app` so browsers survive volume mounts. `docker-compose.yml` sets `ipc: host` and `shm_size: 2gb` which Chromium requires to avoid renderer crashes in containers. Output directories are mounted as volumes so results are accessible on the host after the run.
 
 ---
 
