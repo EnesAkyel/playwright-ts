@@ -35,7 +35,7 @@ export const test = base.extend<Fixtures>({
     checkoutPage: async ({ page }, use) => {
         await use(new CheckoutPage(page));
     },
-    apiClient: async ({ }, use) => {
+    apiClient: async ({}, use) => {
         const requestContext = await request.newContext();
         await use(new ApiClient(requestContext));
         await requestContext.dispose();

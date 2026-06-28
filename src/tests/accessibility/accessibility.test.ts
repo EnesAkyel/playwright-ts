@@ -4,7 +4,6 @@ import { DataFactory } from '../../utils/dataFactory';
 import { epic, feature, story, severity, Severity } from 'allure-js-commons';
 
 test.describe('Accessibility Tests', { tag: ['@a11y', '@regression'] }, () => {
-
     test('JSONPlaceholder homepage should have no critical violations', async ({ homePage }) => {
         await epic('Accessibility');
         await feature('Axe Scanning');
@@ -13,20 +12,15 @@ test.describe('Accessibility Tests', { tag: ['@a11y', '@regression'] }, () => {
 
         // Known violation: JSONPlaceholder images are missing alt text
         // This is a real a11y bug in the app under test, excluded intentionally
-        const result = await AccessibilityHelper.scanPageExcluding(
-            homePage.page,
-            ['image-alt']
-        );
+        const result = await AccessibilityHelper.scanPageExcluding(homePage.page, ['image-alt']);
 
         AccessibilityHelper.printViolations(result);
 
-        const criticalViolations = result.violations.filter(
-            v => v.impact === 'critical'
-        );
+        const criticalViolations = result.violations.filter(v => v.impact === 'critical');
 
         expect(
             criticalViolations,
-            `Critical a11y violations found: ${JSON.stringify(criticalViolations, null, 2)}`
+            `Critical a11y violations found: ${JSON.stringify(criticalViolations, null, 2)}`,
         ).toHaveLength(0);
     });
 
@@ -38,20 +32,18 @@ test.describe('Accessibility Tests', { tag: ['@a11y', '@regression'] }, () => {
 
         // Known violations: color contrast and missing link text are real a11y
         // bugs in the app under test, excluded intentionally
-        const result = await AccessibilityHelper.scanPageExcluding(
-            homePage.page,
-            ['color-contrast', 'link-name']
-        );
+        const result = await AccessibilityHelper.scanPageExcluding(homePage.page, [
+            'color-contrast',
+            'link-name',
+        ]);
 
         AccessibilityHelper.printViolations(result);
 
-        const seriousViolations = result.violations.filter(
-            v => v.impact === 'serious'
-        );
+        const seriousViolations = result.violations.filter(v => v.impact === 'serious');
 
         expect(
             seriousViolations,
-            `Serious a11y violations found: ${JSON.stringify(seriousViolations, null, 2)}`
+            `Serious a11y violations found: ${JSON.stringify(seriousViolations, null, 2)}`,
         ).toHaveLength(0);
     });
 
@@ -64,13 +56,11 @@ test.describe('Accessibility Tests', { tag: ['@a11y', '@regression'] }, () => {
         const result = await AccessibilityHelper.scanPage(loginPage.page);
         AccessibilityHelper.printViolations(result);
 
-        const criticalViolations = result.violations.filter(
-            v => v.impact === 'critical'
-        );
+        const criticalViolations = result.violations.filter(v => v.impact === 'critical');
 
         expect(
             criticalViolations,
-            `Critical a11y violations found: ${JSON.stringify(criticalViolations, null, 2)}`
+            `Critical a11y violations found: ${JSON.stringify(criticalViolations, null, 2)}`,
         ).toHaveLength(0);
     });
 
@@ -88,20 +78,17 @@ test.describe('Accessibility Tests', { tag: ['@a11y', '@regression'] }, () => {
 
         // Known violation: SauceDemo's sort dropdown is missing an accessible name
         // This is a real a11y bug in the app under test, excluded intentionally
-        const result = await AccessibilityHelper.scanPageExcluding(
-            inventoryPage.page,
-            ['select-name']
-        );
+        const result = await AccessibilityHelper.scanPageExcluding(inventoryPage.page, [
+            'select-name',
+        ]);
 
         AccessibilityHelper.printViolations(result);
 
-        const criticalViolations = result.violations.filter(
-            v => v.impact === 'critical'
-        );
+        const criticalViolations = result.violations.filter(v => v.impact === 'critical');
 
         expect(
             criticalViolations,
-            `Critical a11y violations found: ${JSON.stringify(criticalViolations, null, 2)}`
+            `Critical a11y violations found: ${JSON.stringify(criticalViolations, null, 2)}`,
         ).toHaveLength(0);
     });
 
@@ -113,47 +100,20 @@ test.describe('Accessibility Tests', { tag: ['@a11y', '@regression'] }, () => {
 
         const result = await AccessibilityHelper.scanElement(
             loginPage.page,
-            '#login_button_container'
+            '#login_button_container',
         );
         AccessibilityHelper.printViolations(result);
 
-        const criticalViolations = result.violations.filter(
-            v => v.impact === 'critical'
-        );
+        const criticalViolations = result.violations.filter(v => v.impact === 'critical');
 
         expect(
             criticalViolations,
-            `Critical a11y violations on login form: ${JSON.stringify(criticalViolations, null, 2)}`
+            `Critical a11y violations on login form: ${JSON.stringify(criticalViolations, null, 2)}`,
         ).toHaveLength(0);
     });
-
-    test('should log full accessibility report for all pages', async ({
-        homePage,
-        loginPage,
-    }) => {
-        await epic('Accessibility');
-        await feature('Axe Scanning');
-        await severity(Severity.MINOR);
-
-        const pages = [
-            { name: 'JSONPlaceholder', page: homePage.page },
-            { name: 'SauceDemo Login', page: loginPage.page },
-        ];
-
-        for (const { name, page } of pages) {
-            const result = await AccessibilityHelper.scanPage(page);
-            console.log(`\n[a11y] ${name}`);
-            console.log(`  Passes    : ${result.passes}`);
-            console.log(`  Violations: ${result.violations.length}`);
-            console.log(`  Incomplete: ${result.incomplete}`);
-            AccessibilityHelper.printViolations(result);
-        }
-    });
-
 });
 
 test.describe('Keyboard Navigation Tests', { tag: ['@a11y', '@keyboard', '@regression'] }, () => {
-
     test('login form fields should be reachable via Tab key', async ({ loginPage }) => {
         await epic('Accessibility');
         await feature('Keyboard Navigation');
@@ -164,19 +124,28 @@ test.describe('Keyboard Navigation Tests', { tag: ['@a11y', '@keyboard', '@regre
 
         await page.locator('body').click();
         await page.keyboard.press('Tab');
-        const focusedAfterFirstTab = await page.evaluate(() => document.activeElement?.getAttribute('data-test'));
+        const focusedAfterFirstTab = await page.evaluate(() =>
+            document.activeElement?.getAttribute('data-test'),
+        );
         expect(focusedAfterFirstTab).toBe('username');
 
         await page.keyboard.press('Tab');
-        const focusedAfterSecondTab = await page.evaluate(() => document.activeElement?.getAttribute('data-test'));
+        const focusedAfterSecondTab = await page.evaluate(() =>
+            document.activeElement?.getAttribute('data-test'),
+        );
         expect(focusedAfterSecondTab).toBe('password');
 
         await page.keyboard.press('Tab');
-        const focusedAfterThirdTab = await page.evaluate(() => document.activeElement?.getAttribute('data-test'));
+        const focusedAfterThirdTab = await page.evaluate(() =>
+            document.activeElement?.getAttribute('data-test'),
+        );
         expect(focusedAfterThirdTab).toBe('login-button');
     });
 
-    test('login form should be submittable via keyboard only', async ({ loginPage, inventoryPage }) => {
+    test('login form should be submittable via keyboard only', async ({
+        loginPage,
+        inventoryPage,
+    }) => {
         await epic('Accessibility');
         await feature('Keyboard Navigation');
         await story('Complete login using only keyboard');
@@ -199,5 +168,4 @@ test.describe('Keyboard Navigation Tests', { tag: ['@a11y', '@keyboard', '@regre
         await expect(inventoryPage.page.locator('[data-test="title"]')).toBeVisible();
         expect(await inventoryPage.getTitle()).toBe('Products');
     });
-
 });

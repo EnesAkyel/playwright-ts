@@ -24,9 +24,7 @@ export class CartPage extends BasePage {
     }
 
     async getCartItemNames(): Promise<string[]> {
-        return this.page
-            .locator('[data-test="inventory-item-name"]')
-            .allTextContents();
+        return this.page.locator('[data-test="inventory-item-name"]').allTextContents();
     }
 
     async proceedToCheckout() {

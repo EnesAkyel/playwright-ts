@@ -31,8 +31,6 @@ export interface Post {
 }
 
 export class DataFactory {
-
-    // ── User ────────────────────────────────────────────────────────
     static createUser(overrides?: Partial<User>): User {
         const firstName = faker.person.firstName();
         const lastName = faker.person.lastName();
@@ -56,7 +54,6 @@ export class DataFactory {
         };
     }
 
-    // ── Address ─────────────────────────────────────────────────────
     static createAddress(overrides?: Partial<Address>): Address {
         return {
             street: faker.location.streetAddress(),
@@ -68,7 +65,6 @@ export class DataFactory {
         };
     }
 
-    // ── Product ─────────────────────────────────────────────────────
     static createProduct(overrides?: Partial<Product>): Product {
         return {
             name: faker.commerce.productName(),
@@ -78,7 +74,6 @@ export class DataFactory {
         };
     }
 
-    // ── API Post ─────────────────────────────────────────────────────
     static createPost(overrides?: Partial<Post>): Post {
         return {
             title: faker.lorem.sentence(),
@@ -88,7 +83,6 @@ export class DataFactory {
         };
     }
 
-    // ── Bulk generators ──────────────────────────────────────────────
     static createUsers(count: number): User[] {
         return Array.from({ length: count }, () => DataFactory.createUser());
     }

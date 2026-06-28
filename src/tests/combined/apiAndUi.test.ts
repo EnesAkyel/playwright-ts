@@ -2,20 +2,14 @@ import { test, expect } from '../../utils/fixtures';
 import { DataFactory } from '../../utils/dataFactory';
 
 test.describe('API + UI Combined Tests', { tag: ['@api', '@regression'] }, () => {
-
-    test('API returns 100 posts and UI loads successfully', async ({
-                                                                       apiClient,
-                                                                       homePage,
-                                                                   }) => {
+    test('API returns 100 posts and UI loads successfully', async ({ apiClient, homePage }) => {
         const posts = await apiClient.getPosts();
         expect(posts).toHaveLength(100);
 
         expect(await homePage.isMainHeadingVisible()).toBeTruthy();
     });
 
-    test('API creates a post and verifies the response structure', async ({
-                                                                              apiClient,
-                                                                          }) => {
+    test('API creates a post and verifies the response structure', async ({ apiClient }) => {
         const newPost = DataFactory.createPost();
         const created = await apiClient.createPost(newPost);
 
@@ -25,9 +19,7 @@ test.describe('API + UI Combined Tests', { tag: ['@api', '@regression'] }, () =>
         expect(created.userId).toBe(newPost.userId);
     });
 
-    test('API fetches a user and their posts are retrievable', async ({
-                                                                          apiClient,
-                                                                      }) => {
+    test('API fetches a user and their posts are retrievable', async ({ apiClient }) => {
         const user = await apiClient.getUser(1);
         expect(user.id).toBe(1);
         expect(user.email).toContain('@');
@@ -40,9 +32,9 @@ test.describe('API + UI Combined Tests', { tag: ['@api', '@regression'] }, () =>
     });
 
     test('API verifies post data then UI navigates to the site', async ({
-                                                                            apiClient,
-                                                                            homePage,
-                                                                        }) => {
+        apiClient,
+        homePage,
+    }) => {
         const post = await apiClient.getPost(1);
         expect(post.id).toBe(1);
         expect(post.title).toBeTruthy();
@@ -53,13 +45,7 @@ test.describe('API + UI Combined Tests', { tag: ['@api', '@regression'] }, () =>
     });
 
     test('API validates all endpoints return 200', async ({ apiClient }) => {
-        const endpoints = [
-            '/posts',
-            '/users',
-            '/comments',
-            '/albums',
-            '/todos',
-        ];
+        const endpoints = ['/posts', '/users', '/comments', '/albums', '/todos'];
 
         for (const endpoint of endpoints) {
             const status = await apiClient.getStatus(endpoint);
@@ -70,9 +56,7 @@ test.describe('API + UI Combined Tests', { tag: ['@api', '@regression'] }, () =>
     test('API creates multiple posts with unique data', async ({ apiClient }) => {
         const posts = DataFactory.createPosts(3);
 
-        const createdPosts = await Promise.all(
-            posts.map(post => apiClient.createPost(post))
-        );
+        const createdPosts = await Promise.all(posts.map(post => apiClient.createPost(post)));
 
         // JSONPlaceholder always returns id 101 for created posts
         // so we verify content integrity instead of unique IDs
@@ -86,9 +70,7 @@ test.describe('API + UI Combined Tests', { tag: ['@api', '@regression'] }, () =>
         });
     });
 
-    test('API fetches post comments and validates structure', async ({
-                                                                         apiClient,
-                                                                     }) => {
+    test('API fetches post comments and validates structure', async ({ apiClient }) => {
         const comments = await apiClient.getCommentsByPost(1);
 
         expect(comments.length).toBeGreaterThan(0);
@@ -100,9 +82,7 @@ test.describe('API + UI Combined Tests', { tag: ['@api', '@regression'] }, () =>
         });
     });
 
-    test('API update post and verify response reflects changes', async ({
-                                                                            apiClient,
-                                                                        }) => {
+    test('API update post and verify response reflects changes', async ({ apiClient }) => {
         const updatedData = {
             title: 'Updated Title',
             body: 'Updated body content',
@@ -114,5 +94,4 @@ test.describe('API + UI Combined Tests', { tag: ['@api', '@regression'] }, () =>
         expect(updated.body).toBe(updatedData.body);
         expect(updated.id).toBe(1);
     });
-
 });

@@ -3,7 +3,6 @@ import { DataFactory } from '../../utils/dataFactory';
 import { epic, feature, story, severity, Severity } from 'allure-js-commons';
 
 test.describe('SauceDemo - Checkout Form Validation', { tag: ['@regression'] }, () => {
-
     test.beforeEach(async ({ loginPage, inventoryPage, cartPage }) => {
         const user = DataFactory.createSauceUser();
         await loginPage.login(user.username, user.password);
@@ -51,7 +50,11 @@ test.describe('SauceDemo - Checkout Form Validation', { tag: ['@regression'] }, 
         expect(await checkoutPage.getErrorMessage()).toContain('Postal Code is required');
     });
 
-    test('should allow cancelling and returning to cart', async ({ inventoryPage, cartPage, checkoutPage }) => {
+    test('should allow cancelling and returning to cart', async ({
+        inventoryPage,
+        cartPage,
+        checkoutPage,
+    }) => {
         await epic('Checkout');
         await feature('Navigation');
         await story('Continue shopping from cart');
@@ -80,5 +83,4 @@ test.describe('SauceDemo - Checkout Form Validation', { tag: ['@regression'] }, 
 
         expect(await checkoutPage.isErrorVisible()).toBeFalsy();
     });
-
 });

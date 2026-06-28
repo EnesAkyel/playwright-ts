@@ -2,7 +2,6 @@ import { test, expect } from '../../utils/fixtures';
 import { DataFactory } from '../../utils/dataFactory';
 
 test.describe('SauceDemo - Login', { tag: ['@smoke', '@regression'] }, () => {
-
     test('should login with valid credentials', async ({ loginPage, inventoryPage }) => {
         const user = DataFactory.createSauceUser();
         await loginPage.login(user.username, user.password);
@@ -31,5 +30,4 @@ test.describe('SauceDemo - Login', { tag: ['@smoke', '@regression'] }, () => {
         const error = await loginPage.getErrorMessage();
         expect(error).toContain('Password is required');
     });
-
 });
