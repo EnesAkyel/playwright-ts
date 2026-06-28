@@ -71,9 +71,10 @@ test.describe('Performance Metrics', { tag: ['@performance', '@regression'] }, (
         await expect(inventoryPage.page.locator('[data-test="title"]')).toBeVisible();
 
         const heapMb = await getHeapMb(inventoryPage.page);
-        expect(heapMb, `JS heap ${heapMb.toFixed(1)} MB exceeded ${BUDGET_MS.jsHeapMb} MB budget`).toBeLessThan(
-            BUDGET_MS.jsHeapMb,
-        );
+        expect(
+            heapMb,
+            `JS heap ${heapMb.toFixed(1)} MB exceeded ${BUDGET_MS.jsHeapMb} MB budget`,
+        ).toBeLessThan(BUDGET_MS.jsHeapMb);
     });
 
     test('JSONPlaceholder homepage should load within budget', async ({ homePage }) => {
@@ -105,9 +106,10 @@ test.describe('Performance Metrics', { tag: ['@performance', '@regression'] }, (
         await severity(Severity.MINOR);
 
         const heapMb = await getHeapMb(homePage.page);
-        expect(heapMb, `JS heap ${heapMb.toFixed(1)} MB exceeded ${BUDGET_MS.jsHeapMb} MB budget`).toBeLessThan(
-            BUDGET_MS.jsHeapMb,
-        );
+        expect(
+            heapMb,
+            `JS heap ${heapMb.toFixed(1)} MB exceeded ${BUDGET_MS.jsHeapMb} MB budget`,
+        ).toBeLessThan(BUDGET_MS.jsHeapMb);
     });
 
     test('SauceDemo checkout flow should complete within time threshold', async ({
