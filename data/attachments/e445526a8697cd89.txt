@@ -1,0 +1,28 @@
+
+ Accessibility Violations (4)
+  [SERIOUS] color-contrast
+    Description : Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds
+    Help        : Elements must meet minimum color contrast ratio thresholds
+    Nodes       : 4
+    More info   : https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright
+
+  [MINOR] empty-table-header
+    Description : Ensure table headers have discernible text
+    Help        : Table header text should not be empty
+    Nodes       : 4
+    More info   : https://dequeuniversity.com/rules/axe/4.11/empty-table-header?application=playwright
+
+  [SERIOUS] link-name
+    Description : Ensure links have discernible text
+    Help        : Links must have discernible text
+    Nodes       : 4
+    More info   : https://dequeuniversity.com/rules/axe/4.11/link-name?application=playwright
+
+  [MODERATE] region
+    Description : Ensure all page content is contained by landmarks
+    Help        : All page content should be contained by landmarks
+    Nodes       : 9
+    More info   : https://dequeuniversity.com/rules/axe/4.11/region?application=playwright
+
+
+
