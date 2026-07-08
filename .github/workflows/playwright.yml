@@ -186,7 +186,7 @@ jobs:
           retention-days: 7
 
       - name: Publish test summary
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3
         if: always()
         with:
           name: 'Playwright Results — Shard ${{ matrix.shard }}'
@@ -225,7 +225,7 @@ jobs:
           path: allure-results/
 
       - name: Restore Allure history for trending
-        uses: dawidd6/action-download-artifact@v6
+        uses: dawidd6/action-download-artifact@v20
         continue-on-error: true
         with:
           name: allure-history
