@@ -33,15 +33,12 @@ export class InventoryPage extends BasePage {
     }
 
     async removeItemFromCartByName(productName: string) {
-        const item = this.page
-            .locator('[data-test="inventory-item"]')
-            .filter({ hasText: productName });
-        await item.locator('button').click();
+        await this.addItemToCartByName(productName);
     }
 
     async getCartBadgeCount(): Promise<number> {
         const text = await this.cartBadge.innerText();
-        return parseInt(text);
+        return Number.parseInt(text);
     }
 
     async isCartBadgeVisible(): Promise<boolean> {
@@ -64,6 +61,6 @@ export class InventoryPage extends BasePage {
         const prices = await this.page
             .locator('[data-test="inventory-item-price"]')
             .allTextContents();
-        return prices.map(p => parseFloat(p.replace('$', '')));
+        return prices.map(p => Number.parseFloat(p.replace('$', '')));
     }
 }

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import * as fs from 'fs';
+import fs from 'node:fs';
 import { ENV } from '../../utils/env';
 
 test.describe('Auth State Persistence (storageState)', { tag: ['@auth', '@performance'] }, () => {

@@ -1,6 +1,6 @@
 import { test as setup, expect } from '@playwright/test';
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { ENV } from '../../utils/env';
 
 const AUTH_FILE = '.auth/sauce.json';

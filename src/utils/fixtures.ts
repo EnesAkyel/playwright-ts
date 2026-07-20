@@ -1,5 +1,5 @@
 import { test as base, request } from '@playwright/test';
-import * as fs from 'fs';
+import fs from 'node:fs';
 import { HomePage } from '../pages/HomePage';
 import { LoginPage } from '../pages/saucedemo/LoginPage';
 import { InventoryPage } from '../pages/saucedemo/InventoryPage';

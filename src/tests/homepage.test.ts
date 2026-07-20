@@ -42,12 +42,12 @@ test.describe('JSONPlaceholder Homepage', { tag: ['@smoke'] }, () => {
         await story('Soft-assert all major UI landmarks');
         await severity(Severity.CRITICAL);
 
-        expect.soft(await homePage.getTitle()).toMatch(/JSONPlaceholder/);
-        expect.soft(await homePage.isMainHeadingVisible()).toBeTruthy();
-        expect.soft(await homePage.isSubHeadingVisible()).toBeTruthy();
         await expect.soft(homePage.page.locator('nav')).toBeVisible();
         await expect.soft(homePage.page.locator('footer')).toBeVisible();
         await expect.soft(homePage.page.locator('a[href*="posts"]').first()).toBeVisible();
         await expect.soft(homePage.page.locator('a[href*="todos"]').first()).toBeVisible();
+        expect(await homePage.getTitle()).toMatch(/JSONPlaceholder/);
+        expect.soft(await homePage.isMainHeadingVisible()).toBeTruthy();
+        expect.soft(await homePage.isSubHeadingVisible()).toBeTruthy();
     });
 });

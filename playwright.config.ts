@@ -24,18 +24,18 @@ export default defineConfig({
     projects: [
         {
             name: 'auth-setup',
-            testMatch: /.*auth\.setup\.ts/,
+            testMatch: /auth\.setup\.ts/,
         },
 
         {
             name: 'chromium',
             use: { ...devices['Desktop Chrome'] },
-            testIgnore: /.*authPersistence\.test\.ts/,
+            testIgnore: /authPersistence\.test\.ts/,
         },
         {
             name: 'firefox',
             use: { ...devices['Desktop Firefox'] },
-            testIgnore: /.*authPersistence\.test\.ts/,
+            testIgnore: /authPersistence\.test\.ts/,
         },
 
         {
@@ -45,7 +45,7 @@ export default defineConfig({
                 storageState: '.auth/sauce.json',
             },
             dependencies: ['auth-setup'],
-            testMatch: /.*authPersistence\.test\.ts/,
+            testMatch: /authPersistence\.test\.ts/,
         },
     ],
 });

@@ -1,6 +1,6 @@
 import type { FullConfig, Reporter, Suite, TestCase, TestResult } from '@playwright/test/reporter';
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 type TestRecord = {
     title: string;
@@ -24,7 +24,7 @@ type SummaryOutput = {
 };
 
 class SummaryReporter implements Reporter {
-    private records: TestRecord[] = [];
+    private readonly records: TestRecord[] = [];
     private startTime = 0;
 
     onBegin(_config: FullConfig, suite: Suite) {
