@@ -23,7 +23,7 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium firefox
+        run: ./node_modules/.bin/playwright install --with-deps chromium firefox
 
       - name: Resolve staging env
         env:
@@ -37,7 +37,7 @@ jobs:
           echo "SAUCE_URL=${SAUCE_URL_STAGING}"     >> $GITHUB_ENV
 
       - name: Generate Linux baselines
-        run: npx playwright test src/tests/visual/visual.test.ts --update-snapshots
+        run: ./node_modules/.bin/playwright test src/tests/visual/visual.test.ts --update-snapshots
         env:
           CI: true
           SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}

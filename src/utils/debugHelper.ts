@@ -5,7 +5,7 @@ export class DebugHelper {
         const dataTestIds = await page.evaluate(() => {
             return Array.from(document.querySelectorAll('[data-test]')).map(el => ({
                 tag: el.tagName.toLowerCase(),
-                dataTest: el.getAttribute('data-test'),
+                dataTest: (el as HTMLElement).dataset.test,
                 text: el.textContent?.trim().slice(0, 50) || '',
             }));
         });
@@ -20,10 +20,10 @@ export class DebugHelper {
     static async printDataTestIdsByPrefix(page: Page, prefix: string): Promise<void> {
         const dataTestIds = await page.evaluate(prefix => {
             return Array.from(document.querySelectorAll('[data-test]'))
-                .filter(el => el.getAttribute('data-test')?.startsWith(prefix))
+                .filter(el => (el as HTMLElement).dataset.test?.startsWith(prefix))
                 .map(el => ({
                     tag: el.tagName.toLowerCase(),
-                    dataTest: el.getAttribute('data-test'),
+                    dataTest: (el as HTMLElement).dataset.test,
                     text: el.textContent?.trim().slice(0, 50) || '',
                 }));
         }, prefix);
