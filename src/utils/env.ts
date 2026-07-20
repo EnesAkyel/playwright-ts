@@ -1,5 +1,5 @@
-import * as dotenv from 'dotenv';
-import * as path from 'path';
+import dotenv from 'dotenv';
+import path from 'node:path';
 
 const environment = process.env.ENV || 'dev';
 
@@ -19,5 +19,5 @@ export const ENV = {
     saucePassword: required('SAUCE_PASSWORD'),
     environment: process.env.ENVIRONMENT || 'dev',
     headless: process.env.HEADLESS === 'true',
-    timeout: parseInt(process.env.TIMEOUT || '30000'),
+    timeout: Number.parseInt(process.env.TIMEOUT || '30000'),
 };

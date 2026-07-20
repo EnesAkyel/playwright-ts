@@ -7,15 +7,16 @@ ENV CI=true
 
 WORKDIR /app
 
-# Install npm deps first — this layer is cached as long as package*.json don't change
+# Install deps and browsers in one layer — cached as long as package*.json don't change
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts \
+    && ./node_modules/.bin/playwright install --with-deps chromium firefox \
+    && chown -R node:node /ms-playwright /app
 
-# Install Playwright browsers + all system dependencies in one layer
-# Pinned to the browsers used in CI (chromium + firefox)
-RUN npx playwright install --with-deps chromium firefox
+# Copy source as the node user so no further chown is needed
+COPY --chown=node:node . .
 
-# Copy source — this layer rebuilds only when source changes
-COPY . .
+# Drop root — the node user (uid 1000) is built into the base image
+USER node
 
-CMD ["npx", "playwright", "test"]
+CMD ["./node_modules/.bin/playwright", "test"]

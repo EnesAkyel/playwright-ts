@@ -68,7 +68,7 @@ export class DataFactory {
     static createProduct(overrides?: Partial<Product>): Product {
         return {
             name: faker.commerce.productName(),
-            price: parseFloat(faker.commerce.price({ min: 1, max: 500 })),
+            price: Number.parseFloat(faker.commerce.price({ min: 1, max: 500 })),
             quantity: faker.number.int({ min: 1, max: 10 }),
             ...overrides,
         };
