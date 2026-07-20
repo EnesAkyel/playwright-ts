@@ -244,7 +244,7 @@ jobs:
           fi
 
       - name: Install Allure CLI
-        run: npm install -g allure-commandline --save-dev --ignore-scripts
+        run: npm install -g allure-commandline@2.42.0 --ignore-scripts
 
       - name: Generate Allure report
         run: |
