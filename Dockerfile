@@ -13,8 +13,9 @@ RUN npm ci --ignore-scripts \
     && ./node_modules/.bin/playwright install --with-deps chromium firefox \
     && chown -R node:node /ms-playwright /app
 
-# Copy source as the node user so no further chown is needed
-COPY --chown=node:node . .
+# Copy only the files needed to run tests
+COPY --chown=node:node src/ ./src/
+COPY --chown=node:node playwright.config.ts tsconfig.json eslint.config.mjs ./
 
 # Drop root — the node user (uid 1000) is built into the base image
 USER node
