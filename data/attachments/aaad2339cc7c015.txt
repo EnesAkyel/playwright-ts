@@ -3,7 +3,7 @@
   [SERIOUS] color-contrast
     Description : Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds
     Help        : Elements must meet minimum color contrast ratio thresholds
-    Nodes       : 4
+    Nodes       : 3
     More info   : https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright
 
   [MINOR] empty-table-header
