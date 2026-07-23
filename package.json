@@ -33,22 +33,22 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "@axe-core/playwright": "^4.11.3",
-    "@faker-js/faker": "^9.9.0",
-    "@playwright/test": "^1.60.0",
-    "@types/node": "^25.9.2",
-    "allure-commandline": "^2.42.0",
+    "@axe-core/playwright": "^4.12.1",
+    "@faker-js/faker": "^10.5.0",
+    "@playwright/test": "^1.61.1",
+    "@types/node": "^26.1.1",
+    "allure-commandline": "^2.43.0",
     "allure-js-commons": "^3.10.2",
     "allure-playwright": "^3.10.2",
-    "eslint": "^9.39.4",
+    "eslint": "^10.7.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-playwright": "^2.10.4",
-    "prettier": "^3.9.0",
+    "eslint-plugin-playwright": "^2.10.5",
+    "prettier": "^3.9.6",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.62.0"
+    "typescript-eslint": "^8.65.0"
   },
   "dependencies": {
-    "@playwright/mcp": "^0.0.76",
+    "@playwright/mcp": "^0.0.78",
     "dotenv": "^17.4.2"
   },
   "overrides": {
