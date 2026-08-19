@@ -5,7 +5,7 @@ import { ENV } from '../../utils/env';
 test.describe('Auth State Persistence (storageState)', { tag: ['@auth', '@performance'] }, () => {
     test.beforeEach(async ({ page }) => {
         await page.goto(`${ENV.sauceUrl}/inventory.html`);
-        await page.waitForLoadState('networkidle');
+        await expect(page.locator('[data-test="title"]')).toBeVisible();
     });
 
     test('navigates directly to inventory without logging in', async ({ page }) => {
@@ -52,7 +52,7 @@ test.describe('Auth State Persistence (storageState)', { tag: ['@auth', '@perfor
         const secondPage = await context.newPage();
 
         await secondPage.goto(`${ENV.sauceUrl}/inventory.html`);
-        await secondPage.waitForLoadState('networkidle');
+        await expect(secondPage.locator('[data-test="title"]')).toBeVisible();
 
         await expect(secondPage.locator('[data-test="title"]')).toHaveText('Products');
         await expect(secondPage).toHaveURL(/inventory\.html/);
