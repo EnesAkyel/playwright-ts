@@ -153,7 +153,7 @@ test.describe(
             });
 
             await page.goto(ENV.baseUrl);
-            await page.waitForLoadState('networkidle');
+            await expect(page.locator('footer')).toBeVisible();
 
             // All matched requests must have been blocked (none slipped through)
             for (const url of blockedUrls) {
