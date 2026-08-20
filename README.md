@@ -107,8 +107,7 @@ playwright-ts/
 │   │   └── boot-stack/                # start-api + build/serve movie-catalog-ui
 │   └── workflows/
 │       ├── build-api.yml              # Reusable: builds the movie-catalog-api JAR
-│       ├── smoke.yml                  # PR + push: @smoke tests on Chromium
-│       ├── playwright.yml             # PR + push: full regression, sharded
+│       ├── playwright.yml             # PR + push: @regression (includes @smoke), sharded
 │       ├── scheduled.yml              # Nightly regression on Chromium + Firefox
 │       └── update-snapshots.yml       # Manual: regenerate Linux visual baselines
 ├── .env.local                         # Gitignored - the only env file
