@@ -1,5 +1,5 @@
 name: Boot movie-catalog stack
-description: Checks out and starts movie-catalog-api (Docker) and movie-catalog-ui (built + served) on localhost. Requires Node to already be set up by the caller.
+description: Checks out and starts movie-catalog-api (Docker) and movie-catalog-ui (built + served) on localhost. Requires Node to already be set up and playwright-ts's own `npm ci` to have already run (for the pinned `serve` binary) by the caller.
 
 inputs:
   auth-username:
@@ -45,7 +45,10 @@ runs:
       shell: bash
       working-directory: movie-catalog-ui
       run: |
-        npx serve -s dist/movie-catalog-ui/browser -l 4200 &
+        # Use the exact-pinned serve from playwright-ts's own node_modules (installed via
+        # npm ci --ignore-scripts) instead of `npx serve`, which would fetch and run install
+        # scripts for whatever "latest" resolves to on the registry at run time.
+        "${{ github.workspace }}/node_modules/.bin/serve" -s dist/movie-catalog-ui/browser -l 4200 &
         echo "Waiting for movie-catalog-ui..."
         for i in $(seq 1 30); do
           if curl -sf http://localhost:4200 > /dev/null; then
