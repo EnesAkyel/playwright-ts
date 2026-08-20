@@ -29,8 +29,6 @@ test.describe('Authentication & session', { tag: ['@regression'] }, () => {
         await loginPage.login('not-a-real-user', 'not-a-real-password');
 
         expect(await loginPage.isErrorVisible()).toBeTruthy();
-        expect(await loginPage.getErrorMessage()).toContain(
-            'Invalid username or password.',
-        );
+        expect(await loginPage.getErrorMessage()).toContain('Invalid username or password.');
     });
 });

@@ -59,12 +59,7 @@ export class AddMoviePage extends BasePage {
     }
 
     async touchAllFieldsWithoutFilling() {
-        for (const locator of [
-            this.midInput,
-            this.nameInput,
-            this.priceInput,
-            this.studioInput,
-        ]) {
+        for (const locator of [this.midInput, this.nameInput, this.priceInput, this.studioInput]) {
             await locator.click();
             await locator.press('Tab');
         }
