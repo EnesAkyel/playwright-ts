@@ -14,9 +14,9 @@ function required(key: string): string {
 
 export const ENV = {
     baseUrl: required('BASE_URL'),
-    sauceUrl: required('SAUCE_URL'),
-    sauceUsername: required('SAUCE_USERNAME'),
-    saucePassword: required('SAUCE_PASSWORD'),
+    apiUrl: required('API_URL'),
+    username: required('MOVIE_CATALOG_USERNAME'),
+    password: required('MOVIE_CATALOG_PASSWORD'),
     environment: process.env.ENVIRONMENT || 'dev',
     headless: process.env.HEADLESS === 'true',
     timeout: Number.parseInt(process.env.TIMEOUT || '30000'),

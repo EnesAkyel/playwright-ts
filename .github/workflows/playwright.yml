@@ -103,9 +103,9 @@ jobs:
           BASE_URL_DEV:      ${{ secrets.BASE_URL_DEV }}
           BASE_URL_STAGING:  ${{ secrets.BASE_URL_STAGING }}
           BASE_URL_PROD:     ${{ secrets.BASE_URL_PROD }}
-          SAUCE_URL_DEV:     ${{ secrets.SAUCE_URL_DEV }}
-          SAUCE_URL_STAGING: ${{ secrets.SAUCE_URL_STAGING }}
-          SAUCE_URL_PROD:    ${{ secrets.SAUCE_URL_PROD }}
+          API_URL_DEV:       ${{ secrets.API_URL_DEV }}
+          API_URL_STAGING:   ${{ secrets.API_URL_STAGING }}
+          API_URL_PROD:      ${{ secrets.API_URL_PROD }}
         run: |
           ENV_NAME="${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'staging' }}"
           echo "ENV=${ENV_NAME}" >> $GITHUB_ENV
@@ -113,19 +113,19 @@ jobs:
 
           case "$ENV_NAME" in
             dev)
-              echo "BASE_URL=${BASE_URL_DEV}"   >> $GITHUB_ENV
-              echo "SAUCE_URL=${SAUCE_URL_DEV}" >> $GITHUB_ENV
-              echo "TIMEOUT=30000"              >> $GITHUB_ENV
+              echo "BASE_URL=${BASE_URL_DEV}" >> $GITHUB_ENV
+              echo "API_URL=${API_URL_DEV}"   >> $GITHUB_ENV
+              echo "TIMEOUT=30000"            >> $GITHUB_ENV
               ;;
             prod)
-              echo "BASE_URL=${BASE_URL_PROD}"   >> $GITHUB_ENV
-              echo "SAUCE_URL=${SAUCE_URL_PROD}" >> $GITHUB_ENV
-              echo "TIMEOUT=60000"               >> $GITHUB_ENV
+              echo "BASE_URL=${BASE_URL_PROD}" >> $GITHUB_ENV
+              echo "API_URL=${API_URL_PROD}"   >> $GITHUB_ENV
+              echo "TIMEOUT=60000"             >> $GITHUB_ENV
               ;;
             *)
-              echo "BASE_URL=${BASE_URL_STAGING}"   >> $GITHUB_ENV
-              echo "SAUCE_URL=${SAUCE_URL_STAGING}" >> $GITHUB_ENV
-              echo "TIMEOUT=60000"                  >> $GITHUB_ENV
+              echo "BASE_URL=${BASE_URL_STAGING}" >> $GITHUB_ENV
+              echo "API_URL=${API_URL_STAGING}"   >> $GITHUB_ENV
+              echo "TIMEOUT=60000"                >> $GITHUB_ENV
               ;;
           esac
 
@@ -134,10 +134,7 @@ jobs:
 
           CMD="./node_modules/.bin/playwright test"
           if [ "$SUITE" != "all" ]; then
-            case "$SUITE" in
-              visual) CMD="$CMD src/tests/visual/visual.test.ts" ;;
-              *)      CMD="$CMD --grep @${SUITE}" ;;
-            esac
+            CMD="$CMD --grep @${SUITE}"
           fi
           [ "$BROWSER" != "all" ] && CMD="$CMD --project=${BROWSER}"
           CMD="$CMD --shard=${{ matrix.shard }}/${{ env.TOTAL_SHARDS }}"
@@ -148,8 +145,14 @@ jobs:
         run: ${{ steps.env-config.outputs.cmd }}
         env:
           CI: true
-          SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
-          SAUCE_PASSWORD: ${{ secrets.SAUCE_PASSWORD }}
+          MOVIE_CATALOG_USERNAME: ${{ secrets.AUTH_USERNAME }}
+          MOVIE_CATALOG_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
+
+      - name: Redact credentials from test artifacts
+        if: always()
+        run: ./scripts/redact-secrets.sh playwright-report allure-results test-results
+        env:
+          SECRETS: '${{ secrets.AUTH_USERNAME }} ${{ secrets.AUTH_PASSWORD }}'
 
       - name: Upload Playwright HTML report
         uses: actions/upload-artifact@v7
@@ -189,7 +192,7 @@ jobs:
         uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
         if: always()
         with:
-          name: 'Playwright Results — Shard ${{ matrix.shard }}'
+          name: 'Playwright Results - Shard ${{ matrix.shard }}'
           path: test-results/junit.xml
           reporter: java-junit
           fail-on-error: false
@@ -241,7 +244,7 @@ jobs:
             cp -r allure-history/. allure-results/history/
             echo "Allure history restored from previous run"
           else
-            echo "No previous history — this is the first run or no successful push to main"
+            echo "No previous history - this is the first run or no successful push to main"
           fi
 
       - name: Install Allure CLI

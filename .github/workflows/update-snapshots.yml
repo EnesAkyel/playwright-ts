@@ -27,25 +27,31 @@ jobs:
 
       - name: Resolve staging env
         env:
-          BASE_URL_STAGING:  ${{ secrets.BASE_URL_STAGING }}
-          SAUCE_URL_STAGING: ${{ secrets.SAUCE_URL_STAGING }}
+          BASE_URL_STAGING: ${{ secrets.BASE_URL_STAGING }}
+          API_URL_STAGING:  ${{ secrets.API_URL_STAGING }}
         run: |
-          echo "ENV=staging"                        >> $GITHUB_ENV
-          echo "HEADLESS=true"                      >> $GITHUB_ENV
-          echo "TIMEOUT=60000"                      >> $GITHUB_ENV
-          echo "BASE_URL=${BASE_URL_STAGING}"       >> $GITHUB_ENV
-          echo "SAUCE_URL=${SAUCE_URL_STAGING}"     >> $GITHUB_ENV
+          echo "ENV=staging"                    >> $GITHUB_ENV
+          echo "HEADLESS=true"                  >> $GITHUB_ENV
+          echo "TIMEOUT=60000"                  >> $GITHUB_ENV
+          echo "BASE_URL=${BASE_URL_STAGING}"   >> $GITHUB_ENV
+          echo "API_URL=${API_URL_STAGING}"     >> $GITHUB_ENV
 
       - name: Generate Linux baselines
-        run: ./node_modules/.bin/playwright test src/tests/visual/visual.test.ts --update-snapshots
+        run: ./node_modules/.bin/playwright test --grep @visual --update-snapshots
         env:
           CI: true
-          SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
-          SAUCE_PASSWORD: ${{ secrets.SAUCE_PASSWORD }}
+          MOVIE_CATALOG_USERNAME: ${{ secrets.AUTH_USERNAME }}
+          MOVIE_CATALOG_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
+
+      - name: Redact credentials from test artifacts
+        if: always()
+        run: ./scripts/redact-secrets.sh test-results
+        env:
+          SECRETS: '${{ secrets.AUTH_USERNAME }} ${{ secrets.AUTH_PASSWORD }}'
 
       - name: Upload snapshots as artifact
         uses: actions/upload-artifact@v7
         with:
           name: linux-visual-snapshots
-          path: src/tests/visual/visual.test.ts-snapshots/*-linux.png
+          path: src/tests/moviecatalog/**/*-linux.png
           retention-days: 7

@@ -1,37 +1,37 @@
 import { APIRequestContext } from '@playwright/test';
 import { ENV } from './env';
+import { Movie } from './dataFactory';
 
-export interface ApiPost {
-    id?: number;
-    userId: number;
-    title: string;
-    body: string;
+export interface PageResponse<T> {
+    content: T[];
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
 }
 
-export interface ApiUser {
-    id?: number;
+export interface Studio {
+    sid: number;
     name: string;
-    username: string;
-    email: string;
-    phone?: string;
-    website?: string;
 }
 
-export interface ApiComment {
-    id?: number;
-    postId: number;
-    name: string;
-    email: string;
-    body: string;
+export interface MovieQuery {
+    genre?: string;
+    rating?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    page?: number;
+    size?: number;
 }
 
 export class ApiClient {
     private readonly baseUrl: string;
     private readonly request: APIRequestContext;
+    private token: string | null = null;
 
     constructor(request: APIRequestContext) {
         this.request = request;
-        this.baseUrl = ENV.baseUrl;
+        this.baseUrl = ENV.apiUrl;
     }
 
     private async assertOk(
@@ -41,75 +41,80 @@ export class ApiClient {
         if (!response.ok()) {
             const body = await response.text().catch(() => '');
             throw new Error(
-                `${context} failed: HTTP ${response.status()} ${response.statusText()} — ${body}`,
+                `${context} failed: HTTP ${response.status()} ${response.statusText()} - ${body}`,
             );
         }
     }
 
-    async getPosts(): Promise<ApiPost[]> {
-        const response = await this.request.get(`${this.baseUrl}/posts`);
-        await this.assertOk(response, 'GET /posts');
-        return response.json();
+    private authHeaders(): Record<string, string> {
+        return this.token ? { Authorization: `Bearer ${this.token}` } : {};
     }
 
-    async getPost(id: number): Promise<ApiPost> {
-        const response = await this.request.get(`${this.baseUrl}/posts/${id}`);
-        await this.assertOk(response, `GET /posts/${id}`);
-        return response.json();
-    }
-
-    async createPost(post: ApiPost): Promise<ApiPost> {
-        const response = await this.request.post(`${this.baseUrl}/posts`, {
-            data: post,
+    async login(username: string, password: string): Promise<string> {
+        const response = await this.request.post(`${this.baseUrl}/auth/login`, {
+            data: { username, password },
         });
-        await this.assertOk(response, 'POST /posts');
-        return response.json();
+        await this.assertOk(response, 'POST /auth/login');
+        const body = (await response.json()) as { token: string };
+        this.token = body.token;
+        return this.token;
     }
 
-    async updatePost(id: number, post: Partial<ApiPost>): Promise<ApiPost> {
-        const response = await this.request.put(`${this.baseUrl}/posts/${id}`, {
-            data: post,
+    async getMovies(query: MovieQuery = {}): Promise<PageResponse<Movie>> {
+        const response = await this.request.get(`${this.baseUrl}/movies`, {
+            params: query as Record<string, string | number>,
+            headers: this.authHeaders(),
         });
-        await this.assertOk(response, `PUT /posts/${id}`);
+        await this.assertOk(response, 'GET /movies');
         return response.json();
     }
 
-    async deletePost(id: number): Promise<void> {
-        const response = await this.request.delete(`${this.baseUrl}/posts/${id}`);
-        await this.assertOk(response, `DELETE /posts/${id}`);
-    }
-
-    async getPostsByUser(userId: number): Promise<ApiPost[]> {
-        const response = await this.request.get(`${this.baseUrl}/posts?userId=${userId}`);
-        await this.assertOk(response, `GET /posts?userId=${userId}`);
+    async getMovie(mid: number | string): Promise<Movie> {
+        const response = await this.request.get(`${this.baseUrl}/movie/${mid}`, {
+            headers: this.authHeaders(),
+        });
+        await this.assertOk(response, `GET /movie/${mid}`);
         return response.json();
     }
 
-    async getUsers(): Promise<ApiUser[]> {
-        const response = await this.request.get(`${this.baseUrl}/users`);
-        await this.assertOk(response, 'GET /users');
+    async createMovie(movie: Movie): Promise<Movie> {
+        const response = await this.request.post(`${this.baseUrl}/movie`, {
+            data: movie,
+            headers: this.authHeaders(),
+        });
+        await this.assertOk(response, 'POST /movie');
         return response.json();
     }
 
-    async getUser(id: number): Promise<ApiUser> {
-        const response = await this.request.get(`${this.baseUrl}/users/${id}`);
-        await this.assertOk(response, `GET /users/${id}`);
+    async updateMovie(mid: number | string, movie: Partial<Movie>): Promise<Movie> {
+        const response = await this.request.put(`${this.baseUrl}/movie/${mid}`, {
+            data: movie,
+            headers: this.authHeaders(),
+        });
+        await this.assertOk(response, `PUT /movie/${mid}`);
         return response.json();
     }
 
-    async getCommentsByPost(postId: number): Promise<ApiComment[]> {
-        const response = await this.request.get(`${this.baseUrl}/comments?postId=${postId}`);
-        await this.assertOk(response, `GET /comments?postId=${postId}`);
-        return response.json();
+    async deleteMovie(mid: number | string): Promise<void> {
+        const response = await this.request.delete(`${this.baseUrl}/movie/${mid}`, {
+            headers: this.authHeaders(),
+        });
+        await this.assertOk(response, `DELETE /movie/${mid}`);
     }
 
-    async getPostStatus(id: number): Promise<number> {
-        const response = await this.request.get(`${this.baseUrl}/posts/${id}`);
-        return response.status();
+    async getStudios(): Promise<PageResponse<Studio>> {
+        const response = await this.request.get(`${this.baseUrl}/studios`, {
+            params: { size: 100 },
+            headers: this.authHeaders(),
+        });
+        await this.assertOk(response, 'GET /studios');
+        return response.json();
     }
 
     async getStatus(endpoint: string): Promise<number> {
-        const response = await this.request.get(`${this.baseUrl}${endpoint}`);
+        const response = await this.request.get(`${this.baseUrl}${endpoint}`, {
+            headers: this.authHeaders(),
+        });
         return response.status();
     }
 }

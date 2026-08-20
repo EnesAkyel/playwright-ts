@@ -6,10 +6,11 @@ allure-report/
 playwright-report/
 test-results/
 *-snapshots/
-!src/tests/visual/**-snapshots/
+!src/tests/moviecatalog/**-snapshots/
 .env.local
 .env.dev
 .env.staging
 .env.prod
 .DS_Store
 .idea/
+/docs
