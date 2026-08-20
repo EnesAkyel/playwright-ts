@@ -1,10 +1,7 @@
 import dotenv from 'dotenv';
 import path from 'node:path';
 
-const environment = process.env.ENV || 'dev';
-
-dotenv.config({ path: path.resolve(process.cwd(), `.env.${environment}`) });
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local'), override: true });
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 function required(key: string): string {
     const value = process.env[key];
@@ -17,7 +14,6 @@ export const ENV = {
     apiUrl: required('API_URL'),
     username: required('MOVIE_CATALOG_USERNAME'),
     password: required('MOVIE_CATALOG_PASSWORD'),
-    environment: process.env.ENVIRONMENT || 'dev',
     headless: process.env.HEADLESS === 'true',
     timeout: Number.parseInt(process.env.TIMEOUT || '30000'),
 };

@@ -8,9 +8,6 @@ test-results/
 *-snapshots/
 !src/tests/moviecatalog/**-snapshots/
 .env.local
-.env.dev
-.env.staging
-.env.prod
 .DS_Store
 .idea/
 /docs

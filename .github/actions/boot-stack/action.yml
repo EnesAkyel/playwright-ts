@@ -1,0 +1,58 @@
+name: Boot movie-catalog stack
+description: Checks out and starts movie-catalog-api (Docker) and movie-catalog-ui (built + served) on localhost. Requires Node to already be set up by the caller.
+
+inputs:
+  auth-username:
+    description: 'Auth username'
+    required: true
+  auth-password:
+    description: 'Auth password'
+    required: true
+  jwt-secret:
+    description: 'JWT secret (base64-encoded, min 32 bytes)'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout movie-catalog-api
+      uses: actions/checkout@v7
+      with:
+        repository: EnesAkyel/movie-catalog-api
+        path: movie-catalog-api
+
+    - name: Checkout movie-catalog-ui
+      uses: actions/checkout@v7
+      with:
+        repository: EnesAkyel/movie-catalog-ui
+        path: movie-catalog-ui
+
+    - name: Start movie-catalog-api
+      uses: ./.github/actions/start-api
+      with:
+        auth-username: ${{ inputs.auth-username }}
+        auth-password: ${{ inputs.auth-password }}
+        jwt-secret: ${{ inputs.jwt-secret }}
+
+    - name: Build movie-catalog-ui
+      shell: bash
+      working-directory: movie-catalog-ui
+      run: |
+        npm ci --ignore-scripts
+        npm run build
+
+    - name: Serve movie-catalog-ui
+      shell: bash
+      working-directory: movie-catalog-ui
+      run: |
+        npx serve -s dist/movie-catalog-ui/browser -l 4200 &
+        echo "Waiting for movie-catalog-ui..."
+        for i in $(seq 1 30); do
+          if curl -sf http://localhost:4200 > /dev/null; then
+            echo "movie-catalog-ui is ready after $((i * 2))s"
+            exit 0
+          fi
+          sleep 2
+        done
+        echo "movie-catalog-ui did not become ready in time"
+        exit 1

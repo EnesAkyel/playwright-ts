@@ -11,13 +11,13 @@
 
 set -euo pipefail
 
-if [ -z "${SECRETS:-}" ]; then
+if [[ -z "${SECRETS:-}" ]]; then
   echo "redact-secrets: no SECRETS provided, nothing to do"
   exit 0
 fi
 
 targets=("$@")
-if [ ${#targets[@]} -eq 0 ]; then
+if [[ ${#targets[@]} -eq 0 ]]; then
   echo "redact-secrets: usage: SECRETS=\"...\" $0 <dir> [dir ...]"
   exit 1
 fi
@@ -26,7 +26,7 @@ redact_text_file() {
   local file="$1"
   for secret in $SECRETS; do
     # Skip trivially short values - redacting them would corrupt unrelated content
-    if [ ${#secret} -lt 4 ]; then
+    if [[ ${#secret} -lt 4 ]]; then
       continue
     fi
     perl -i -pe "s/\Q${secret}\E/[REDACTED]/g" "$file" 2>/dev/null || true
@@ -53,7 +53,7 @@ count_zip=0
 count_text=0
 
 for dir in "${targets[@]}"; do
-  [ -d "$dir" ] || continue
+  [[ -d "$dir" ]] || continue
 
   while IFS= read -r -d '' zip; do
     redact_zip "$zip"

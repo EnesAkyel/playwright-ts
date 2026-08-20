@@ -96,14 +96,22 @@ playwright-ts/
 │       ├── accessibilityHelper.ts
 │       ├── dataFactory.ts             # Faker-based movie/studio builders
 │       ├── debugHelper.ts
-│       ├── env.ts                     # Multi-env config with validation
+│       ├── env.ts                     # Config from .env.local, validated at startup
 │       ├── fixtures.ts                # Playwright fixture definitions
 │       └── visualHelper.ts
-├── .github/workflows/
-│   ├── playwright.yml                 # PR + push: full regression on Chromium
-│   ├── scheduled.yml                  # Nightly regression on Chromium + Firefox
-│   └── update-snapshots.yml           # Manual: regenerate Linux visual baselines
-├── .env.dev / .env.staging / .env.prod
+├── scripts/
+│   └── redact-secrets.sh              # Strips credentials from CI report/trace artifacts
+├── .github/
+│   ├── actions/
+│   │   ├── start-api/                 # Boots movie-catalog-api via Docker Compose
+│   │   └── boot-stack/                # start-api + build/serve movie-catalog-ui
+│   └── workflows/
+│       ├── build-api.yml              # Reusable: builds the movie-catalog-api JAR
+│       ├── smoke.yml                  # PR + push: @smoke tests on Chromium
+│       ├── playwright.yml             # PR + push: full regression, sharded
+│       ├── scheduled.yml              # Nightly regression on Chromium + Firefox
+│       └── update-snapshots.yml       # Manual: regenerate Linux visual baselines
+├── .env.local                         # Gitignored - the only env file
 ├── .nvmrc                             # Node 24
 ├── eslint.config.mjs                  # ESLint 9 flat config with playwright + typescript rules
 ├── .prettierrc                        # Formatting: 4-space indent, single quotes, trailing commas
@@ -118,7 +126,7 @@ playwright-ts/
 
 ## Test Coverage
 
-The full case list — one per distinct Playwright technique the suite is meant to demonstrate — lives in [`docs/playwright-test-plan.md`](https://github.com/EnesAkyel/movie-catalog-ui/blob/main/docs/playwright-test-plan.md) in movie-catalog-ui, so it stays next to the app it describes. It covers:
+The full case list - one per distinct Playwright technique the suite is meant to demonstrate - lives in [`docs/playwright-test-plan.md`](https://github.com/EnesAkyel/movie-catalog-ui/blob/main/docs/playwright-test-plan.md) in movie-catalog-ui, so it stays next to the app it describes. It covers:
 
 - **Authentication & session** - login, `authGuard` redirects, `authInterceptor` 401 handling, `storageState` persistence
 - **Movie list** - debounced search (`page.clock`), filters, sorting, pagination, delete + auto-dismissing toast, data-driven genre navigation
@@ -158,8 +166,7 @@ npx playwright install
 
 ### Environment Setup
 
-The framework resolves config by `ENV` variable (`dev` / `staging` / `prod`).  
-Local overrides go in `.env.local` (gitignored).
+Config lives in `.env.local` (gitignored) - there's no dev/staging/prod switching. Both the local run and CI point at a `movie-catalog-ui` + `movie-catalog-api` instance running on `localhost` (in CI, the stack is built and started fresh in the runner - see [CI/CD](#cicd)).
 
 ```bash
 # .env.local
@@ -180,11 +187,6 @@ TIMEOUT=30000
 # All tests
 npm test
 
-# By environment
-npm run test:dev
-npm run test:staging
-npm run test:prod
-
 # By tag
 npm run test:smoke        # Quick sanity - runs on every commit
 npm run test:regression   # Full suite
@@ -200,7 +202,7 @@ npm run test:firefox
 npx playwright test src/tests/moviecatalog/
 
 # By name
-npx playwright test -g "should complete full checkout flow"
+npx playwright test -g "valid login navigates to the movie list"
 
 # Headed (watch the browser)
 npm run test:headed
@@ -309,7 +311,7 @@ npx playwright install --with-deps
 
 **DataFactory** - Faker.js generates unique test data per run. No hardcoded strings that silently break across environments or parallel runs.
 
-**Multi-env config** - `.env.dev / .staging / .prod` swap URLs with one flag. `.env.local` allows personal overrides without touching shared config.
+**No environment switching** - there's no deployed dev/staging/prod for this project, so the suite doesn't pretend there is one. `.env.local` holds config for local runs; CI builds and boots `movie-catalog-api` + `movie-catalog-ui` fresh in the runner and points at `localhost` (see `boot-stack`). One less axis of config drift to debug.
 
 **Soft assertions** - `expect.soft()` in smoke tests lets all checks run before failing, giving a complete picture of what's broken in a single pass.
 
