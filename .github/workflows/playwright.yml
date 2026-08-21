@@ -13,12 +13,6 @@ on:
         default: 'smoke'
         type: choice
         options: [smoke, regression, api, a11y, visual, unit, all]
-      browser:
-        description: 'Browser'
-        required: true
-        default: 'chromium'
-        type: choice
-        options: [chromium, firefox, all]
 
 env:
   NODE_VERSION: '24'
@@ -58,7 +52,7 @@ jobs:
     uses: ./.github/workflows/build-api.yml
 
   test:
-    name: '${{ github.event_name == ''workflow_dispatch'' && inputs.test_suite || ''regression'' }} | ${{ github.event_name == ''workflow_dispatch'' && inputs.browser || ''chromium'' }} | shard ${{ matrix.shard }}/${{ strategy.job-total }}'
+    name: '${{ github.event_name == ''workflow_dispatch'' && inputs.test_suite || ''regression'' }} | ${{ matrix.browser }}'
     runs-on: ubuntu-latest
     needs: build-api
     timeout-minutes: 60
@@ -69,7 +63,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3]
+        browser: [chromium, firefox, webkit]
 
     steps:
       - name: Checkout
@@ -111,14 +105,11 @@ jobs:
         id: cmd
         run: |
           SUITE="${{ github.event_name == 'workflow_dispatch' && inputs.test_suite || 'regression' }}"
-          BROWSER="${{ github.event_name == 'workflow_dispatch' && inputs.browser || 'chromium' }}"
 
-          CMD="./node_modules/.bin/playwright test"
+          CMD="./node_modules/.bin/playwright test --project=${{ matrix.browser }}"
           if [ "$SUITE" != "all" ]; then
             CMD="$CMD --grep @${SUITE}"
           fi
-          [ "$BROWSER" != "all" ] && CMD="$CMD --project=${BROWSER}"
-          CMD="$CMD --shard=${{ matrix.shard }}/${{ strategy.job-total }}"
 
           echo "cmd=${CMD}" >> $GITHUB_OUTPUT
 
@@ -143,7 +134,7 @@ jobs:
         uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: playwright-report-${{ matrix.shard }}-${{ github.run_id }}
+          name: playwright-report-${{ matrix.browser }}-${{ github.run_id }}
           path: playwright-report/
           retention-days: 14
 
@@ -151,7 +142,7 @@ jobs:
         uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: allure-results-${{ matrix.shard }}-${{ github.run_id }}
+          name: allure-results-${{ matrix.browser }}-${{ github.run_id }}
           path: allure-results/
           retention-days: 3
 
@@ -159,7 +150,7 @@ jobs:
         uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: junit-results-${{ matrix.shard }}-${{ github.run_id }}
+          name: junit-results-${{ matrix.browser }}-${{ github.run_id }}
           path: test-results/junit.xml
           retention-days: 14
 
@@ -167,7 +158,7 @@ jobs:
         uses: actions/upload-artifact@v7
         if: failure()
         with:
-          name: failure-artifacts-${{ matrix.shard }}-${{ github.run_id }}
+          name: failure-artifacts-${{ matrix.browser }}-${{ github.run_id }}
           path: |
             test-results/
             !test-results/junit.xml
@@ -177,7 +168,7 @@ jobs:
         uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2
         if: always()
         with:
-          name: 'Playwright Results - Shard ${{ matrix.shard }}'
+          name: 'Playwright Results - ${{ matrix.browser }}'
           path: test-results/junit.xml
           reporter: java-junit
           fail-on-error: false
@@ -205,7 +196,7 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
-      - name: Download Allure results from all shards
+      - name: Download Allure results from all browsers
         uses: actions/download-artifact@v8
         with:
           pattern: allure-results-*-${{ github.run_id }}
