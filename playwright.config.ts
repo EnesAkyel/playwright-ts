@@ -31,16 +31,19 @@ export default defineConfig({
             name: 'chromium',
             use: { ...devices['Desktop Chrome'] },
             testIgnore: /authPersistence\.test\.ts/,
+            dependencies: ['auth-setup'],
         },
         {
             name: 'firefox',
             use: { ...devices['Desktop Firefox'] },
             testIgnore: /authPersistence\.test\.ts/,
+            dependencies: ['auth-setup'],
         },
         {
             name: 'webkit',
             use: { ...devices['Desktop Safari'] },
             testIgnore: /authPersistence\.test\.ts/,
+            dependencies: ['auth-setup'],
         },
 
         {
