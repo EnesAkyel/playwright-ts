@@ -30,10 +30,11 @@ export interface Credentials {
 }
 
 export class DataFactory {
-    // High range keeps generated MIDs clear of seeded/fixture movie data
+    // Backend/frontend both enforce a 4-digit MID (1000-9999); start well above
+    // 1000-1010, the range known fixture movies (e.g. 1001) live in.
     static createMovie(overrides?: Partial<Movie>): Movie {
         return {
-            mid: faker.number.int({ min: 100_000, max: 999_999 }),
+            mid: faker.number.int({ min: 2000, max: 9989 }),
             name: faker.music.songName(),
             genre: faker.helpers.arrayElement(GENRES),
             price: Number.parseFloat(faker.commerce.price({ min: 1, max: 50 })),
