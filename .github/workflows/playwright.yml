@@ -23,11 +23,17 @@ on:
 env:
   NODE_VERSION: '24'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     name: Lint & Format
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout

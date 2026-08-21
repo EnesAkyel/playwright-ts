@@ -27,6 +27,14 @@ runs:
         repository: EnesAkyel/movie-catalog-ui
         path: movie-catalog-ui
 
+    - name: Cache movie-catalog-ui npm dependencies
+      uses: actions/cache@v6
+      with:
+        path: ~/.npm
+        key: movie-catalog-ui-npm-${{ runner.os }}-${{ hashFiles('movie-catalog-ui/package-lock.json') }}
+        restore-keys: |
+          movie-catalog-ui-npm-${{ runner.os }}-
+
     - name: Start movie-catalog-api
       uses: ./.github/actions/start-api
       with:

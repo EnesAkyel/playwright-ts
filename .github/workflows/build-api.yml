@@ -21,6 +21,8 @@ jobs:
         with:
           java-version: '25'
           distribution: 'temurin'
+          cache: 'maven'
+          cache-dependency-path: movie-catalog-api/pom.xml
 
       - name: Build
         working-directory: movie-catalog-api
