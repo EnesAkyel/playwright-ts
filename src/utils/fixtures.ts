@@ -1,4 +1,4 @@
-import { test as base, request } from '@playwright/test';
+import { test as base, request, BrowserContext, Page } from '@playwright/test';
 import fs from 'node:fs';
 import { LoginPage } from '../pages/moviecatalog/LoginPage';
 import { ListPage } from '../pages/moviecatalog/ListPage';
@@ -17,6 +17,7 @@ type Fixtures = {
     movieDetailPage: MovieDetailPage;
     errorPopup: ErrorPopup;
     apiClient: ApiClient;
+    loggedInContext: { context: BrowserContext; page: Page };
     loggedInPage: ListPage;
 };
 
@@ -43,7 +44,7 @@ export const test = base.extend<Fixtures>({
         await use(new ApiClient(requestContext));
         await requestContext.dispose();
     },
-    loggedInPage: async ({ browser }, use) => {
+    loggedInContext: async ({ browser }, use) => {
         if (!fs.existsSync(AUTH_FILE)) {
             throw new Error(
                 `Auth file not found at ${AUTH_FILE}. ` +
@@ -52,9 +53,15 @@ export const test = base.extend<Fixtures>({
         }
         const context = await browser.newContext({ storageState: AUTH_FILE });
         const page = await context.newPage();
+        await use({ context, page });
+        await context.close();
+    },
+    // Navigates to /list immediately; use `loggedInContext` directly when a test
+    // needs to install a page.route() mock before the first request fires.
+    loggedInPage: async ({ loggedInContext }, use) => {
+        const { page } = loggedInContext;
         await page.goto(`${ENV.baseUrl}/list`);
         await use(new ListPage(page));
-        await context.close();
     },
 });
 
