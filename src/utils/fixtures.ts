@@ -19,6 +19,7 @@ type Fixtures = {
     apiClient: ApiClient;
     loggedInContext: { context: BrowserContext; page: Page };
     loggedInPage: ListPage;
+    loggedInAddMoviePage: AddMoviePage;
 };
 
 export const test = base.extend<Fixtures>({
@@ -62,6 +63,12 @@ export const test = base.extend<Fixtures>({
         const { page } = loggedInContext;
         await page.goto(`${ENV.baseUrl}/list`);
         await use(new ListPage(page));
+    },
+    loggedInAddMoviePage: async ({ loggedInContext }, use) => {
+        const { page } = loggedInContext;
+        const addMoviePage = new AddMoviePage(page);
+        await addMoviePage.openAdd();
+        await use(addMoviePage);
     },
 });
 

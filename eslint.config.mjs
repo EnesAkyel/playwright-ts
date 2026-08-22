@@ -20,26 +20,27 @@ export default tseslint.config(
             '@typescript-eslint/no-explicit-any': 'warn',
             '@typescript-eslint/explicit-function-return-type': 'off',
 
-            // VisualHelper.compare* and AccessibilityHelper.scan* wrap expect() internally;
-            // list explicit names because the plugin doesn't resolve member expressions via globs
+            // VisualHelper.compare* and AccessibilityHelper.scan* wrap expect() internally.
+            // The plugin's member-expression matcher only checks the rightmost identifier
+            // (e.g. `compareElement`), not the dotted path, so list bare method names here.
             'playwright/expect-expect': [
                 'warn',
                 {
                     assertFunctionNames: [
-                        'VisualHelper.compareFullPage',
-                        'VisualHelper.compareElement',
-                        'AccessibilityHelper.scanPage',
-                        'AccessibilityHelper.scanPageExcluding',
-                        'AccessibilityHelper.scanElement',
+                        'compareFullPage',
+                        'compareElement',
+                        'scanPage',
+                        'scanPageExcluding',
+                        'scanElement',
                     ],
                 },
             ],
 
             'playwright/no-wait-for-timeout': 'warn',
-            'playwright/no-networkidle': 'off',        // used intentionally in page objects
+            'playwright/no-networkidle': 'off', // used intentionally in page objects
             'playwright/prefer-web-first-assertions': 'warn',
             'playwright/no-conditional-in-test': 'warn',
-            'playwright/prefer-locator': 'off',        // page objects legitimately use page methods
+            'playwright/prefer-locator': 'off', // page objects legitimately use page methods
 
             // allowConditional: test.skip(browserName !== 'chromium') is the correct
             // Playwright pattern for browser-specific tests — not a hidden skip
