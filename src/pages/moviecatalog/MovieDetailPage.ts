@@ -8,6 +8,7 @@ export class MovieDetailPage extends BasePage {
     readonly deleteMovieButton: Locator;
     readonly confirmDeleteYes: Locator;
     readonly confirmDeleteNo: Locator;
+    readonly errorMessage: Locator;
 
     constructor(page: Page) {
         super(page);
@@ -16,6 +17,7 @@ export class MovieDetailPage extends BasePage {
         this.deleteMovieButton = page.getByTestId('delete-movie-button');
         this.confirmDeleteYes = page.getByTestId('confirm-delete-yes');
         this.confirmDeleteNo = page.getByTestId('confirm-delete-no');
+        this.errorMessage = page.getByRole('alert');
     }
 
     async open(mid: number | string) {
