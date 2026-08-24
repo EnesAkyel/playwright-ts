@@ -22,16 +22,21 @@ test.describe('Authentication & session', { tag: ['@regression'] }, () => {
         },
     );
 
-    test('invalid credentials show an inline error', async ({ loginPage }) => {
+    test('invalid credentials show an inline error', async ({ loginPage, page }) => {
         await epic('Authentication');
         await feature('Login');
         await story('Invalid credentials stay on /login with an error');
         await severity(Severity.CRITICAL);
 
+        const errorPopup = new ErrorPopup(page);
+
         await loginPage.login('not-a-real-user', 'not-a-real-password');
 
         expect(await loginPage.isErrorVisible()).toBeTruthy();
         expect(await loginPage.getErrorMessage()).toContain('Invalid username or password.');
+        // /auth/login is exempt from the interceptor's popup handling — a bad login is not a
+        // session expiry, so it must never surface the global error popup.
+        await expect(errorPopup.root).toBeHidden();
     });
 
     test('a mocked 401 from the login endpoint shows the same inline error', async ({
@@ -44,6 +49,8 @@ test.describe('Authentication & session', { tag: ['@regression'] }, () => {
             'A 401 response (any body) renders the fixed inline error, not the response body',
         );
         await severity(Severity.NORMAL);
+
+        const errorPopup = new ErrorPopup(page);
 
         await page.route('**/auth/login', route =>
             route.fulfill({
@@ -58,6 +65,9 @@ test.describe('Authentication & session', { tag: ['@regression'] }, () => {
         expect(await loginPage.isErrorVisible()).toBeTruthy();
         expect(await loginPage.getErrorMessage()).toContain('Invalid username or password.');
         await expect(page).toHaveURL(/\/login$/);
+        // Same exemption as above, this time with a mocked 401 instead of the real backend's
+        // rejection — confirms the exemption is keyed off the request URL, not the response.
+        await expect(errorPopup.root).toBeHidden();
     });
 
     test('unauthenticated access to a protected route redirects to /login', async ({ page }) => {
