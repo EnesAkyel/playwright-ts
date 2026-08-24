@@ -1,0 +1,69 @@
+name: Boot movie-catalog stack
+description: Checks out and starts movie-catalog-api (Docker) and movie-catalog-ui (built + served) on localhost. Requires Node to already be set up and playwright-ts's own `npm ci` to have already run (for the pinned `serve` binary) by the caller.
+
+inputs:
+  auth-username:
+    description: 'Auth username'
+    required: true
+  auth-password:
+    description: 'Auth password'
+    required: true
+  jwt-secret:
+    description: 'JWT secret (base64-encoded, min 32 bytes)'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout movie-catalog-api
+      uses: actions/checkout@v7
+      with:
+        repository: EnesAkyel/movie-catalog-api
+        path: movie-catalog-api
+
+    - name: Checkout movie-catalog-ui
+      uses: actions/checkout@v7
+      with:
+        repository: EnesAkyel/movie-catalog-ui
+        path: movie-catalog-ui
+
+    - name: Cache movie-catalog-ui npm dependencies
+      uses: actions/cache@v6
+      with:
+        path: ~/.npm
+        key: movie-catalog-ui-npm-${{ runner.os }}-${{ hashFiles('movie-catalog-ui/package-lock.json') }}
+        restore-keys: |
+          movie-catalog-ui-npm-${{ runner.os }}-
+
+    - name: Start movie-catalog-api
+      uses: ./.github/actions/start-api
+      with:
+        auth-username: ${{ inputs.auth-username }}
+        auth-password: ${{ inputs.auth-password }}
+        jwt-secret: ${{ inputs.jwt-secret }}
+
+    - name: Build movie-catalog-ui
+      shell: bash
+      working-directory: movie-catalog-ui
+      run: |
+        npm ci --ignore-scripts
+        npm run build
+
+    - name: Serve movie-catalog-ui
+      shell: bash
+      working-directory: movie-catalog-ui
+      run: |
+        # Use the exact-pinned serve from playwright-ts's own node_modules (installed via
+        # npm ci --ignore-scripts) instead of `npx serve`, which would fetch and run install
+        # scripts for whatever "latest" resolves to on the registry at run time.
+        "${{ github.workspace }}/node_modules/.bin/serve" -s dist/movie-catalog-ui/browser -l 4200 &
+        echo "Waiting for movie-catalog-ui..."
+        for i in $(seq 1 30); do
+          if curl -sf http://localhost:4200 > /dev/null; then
+            echo "movie-catalog-ui is ready after $((i * 2))s"
+            exit 0
+          fi
+          sleep 2
+        done
+        echo "movie-catalog-ui did not become ready in time"
+        exit 1

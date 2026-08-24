@@ -24,25 +24,33 @@ export default defineConfig({
     projects: [
         {
             name: 'auth-setup',
-            testMatch: /auth\.setup\.ts/,
+            testMatch: /moviecatalog\.auth\.setup\.ts/,
         },
 
         {
             name: 'chromium',
             use: { ...devices['Desktop Chrome'] },
             testIgnore: /authPersistence\.test\.ts/,
+            dependencies: ['auth-setup'],
         },
         {
             name: 'firefox',
             use: { ...devices['Desktop Firefox'] },
             testIgnore: /authPersistence\.test\.ts/,
+            dependencies: ['auth-setup'],
+        },
+        {
+            name: 'webkit',
+            use: { ...devices['Desktop Safari'] },
+            testIgnore: /authPersistence\.test\.ts/,
+            dependencies: ['auth-setup'],
         },
 
         {
             name: 'chromium-authenticated',
             use: {
                 ...devices['Desktop Chrome'],
-                storageState: '.auth/sauce.json',
+                storageState: '.auth/moviecatalog.json',
             },
             dependencies: ['auth-setup'],
             testMatch: /authPersistence\.test\.ts/,

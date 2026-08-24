@@ -1,97 +1,57 @@
 import { faker } from '@faker-js/faker';
 
-export interface User {
-    firstName: string;
-    lastName: string;
-    fullName: string;
-    email: string;
-    password: string;
-    phone: string;
-    address: Address;
-}
+export const GENRES = [
+    'Action',
+    'Adventure',
+    'Comedy',
+    'Drama',
+    'Fantasy',
+    'Horror',
+    'Mystery',
+    'Romance',
+    'Sci-Fi',
+    'Thriller',
+] as const;
 
-export interface Address {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-}
+export const RATINGS = ['G', 'PG', 'PG-13', 'R', 'NC-17'] as const;
 
-export interface Product {
+export interface Movie {
+    mid: number;
     name: string;
+    genre: string;
     price: number;
-    quantity: number;
+    rating: string;
+    studio: number;
 }
 
-export interface Post {
-    title: string;
-    body: string;
-    userId: number;
+export interface Credentials {
+    username: string;
+    password: string;
 }
 
 export class DataFactory {
-    static createUser(overrides?: Partial<User>): User {
-        const firstName = faker.person.firstName();
-        const lastName = faker.person.lastName();
-
+    // Backend/frontend both enforce a 4-digit MID (1000-9999); start well above
+    // 1000-1010, the range known fixture movies (e.g. 1001) live in.
+    static createMovie(overrides?: Partial<Movie>): Movie {
         return {
-            firstName,
-            lastName,
-            fullName: `${firstName} ${lastName}`,
-            email: faker.internet.email({ firstName, lastName }).toLowerCase(),
-            password: faker.internet.password({ length: 12, memorable: false }),
-            phone: faker.phone.number(),
-            address: DataFactory.createAddress(),
+            mid: faker.number.int({ min: 2000, max: 9989 }),
+            name: faker.music.songName(),
+            genre: faker.helpers.arrayElement(GENRES),
+            price: Number.parseFloat(faker.commerce.price({ min: 1, max: 50 })),
+            rating: faker.helpers.arrayElement(RATINGS),
+            studio: faker.number.int({ min: 1, max: 100 }),
             ...overrides,
         };
     }
 
-    static createSauceUser() {
+    static createMovies(count: number): Movie[] {
+        return Array.from({ length: count }, () => DataFactory.createMovie());
+    }
+
+    static createCredentials(): Credentials {
         return {
-            username: process.env.SAUCE_USERNAME || 'standard_user',
-            password: process.env.SAUCE_PASSWORD || 'secret_sauce',
+            username: process.env.MOVIE_CATALOG_USERNAME ?? '',
+            password: process.env.MOVIE_CATALOG_PASSWORD ?? '',
         };
-    }
-
-    static createAddress(overrides?: Partial<Address>): Address {
-        return {
-            street: faker.location.streetAddress(),
-            city: faker.location.city(),
-            state: faker.location.state(),
-            zipCode: faker.location.zipCode(),
-            country: 'US',
-            ...overrides,
-        };
-    }
-
-    static createProduct(overrides?: Partial<Product>): Product {
-        return {
-            name: faker.commerce.productName(),
-            price: Number.parseFloat(faker.commerce.price({ min: 1, max: 500 })),
-            quantity: faker.number.int({ min: 1, max: 10 }),
-            ...overrides,
-        };
-    }
-
-    static createPost(overrides?: Partial<Post>): Post {
-        return {
-            title: faker.lorem.sentence(),
-            body: faker.lorem.paragraphs(2),
-            userId: faker.number.int({ min: 1, max: 10 }),
-            ...overrides,
-        };
-    }
-
-    static createUsers(count: number): User[] {
-        return Array.from({ length: count }, () => DataFactory.createUser());
-    }
-
-    static createProducts(count: number): Product[] {
-        return Array.from({ length: count }, () => DataFactory.createProduct());
-    }
-
-    static createPosts(count: number): Post[] {
-        return Array.from({ length: count }, () => DataFactory.createPost());
     }
 }

@@ -1,0 +1,70 @@
+name: Start movie-catalog-api
+description: Build Docker image from pre-built JAR, start the API, and wait until it is healthy.
+
+inputs:
+  auth-username:
+    description: 'Auth username'
+    required: true
+  auth-password:
+    description: 'Auth password'
+    required: true
+  jwt-secret:
+    description: 'JWT secret (base64-encoded, min 32 bytes)'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Download application JAR
+      uses: actions/download-artifact@v8
+      with:
+        name: app-jar
+        path: movie-catalog-api/target/
+
+    - name: Copy JAR into the build context
+      shell: bash
+      working-directory: movie-catalog-api
+      run: cp target/movie-catalog-api-*.jar app.jar
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v4
+
+    - name: Build Docker image from pre-built JAR
+      uses: docker/build-push-action@v7
+      with:
+        context: movie-catalog-api
+        file: movie-catalog-api/Dockerfile.ci
+        tags: movie-catalog-api:latest
+        load: true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Clean up JAR from the build context
+      shell: bash
+      working-directory: movie-catalog-api
+      run: rm app.jar
+
+    - name: Start movie-catalog-api
+      shell: bash
+      working-directory: movie-catalog-api
+      env:
+        AUTH_USERNAME: ${{ inputs.auth-username }}
+        AUTH_PASSWORD: ${{ inputs.auth-password }}
+        JWT_SECRET: ${{ inputs.jwt-secret }}
+      run: docker compose up -d
+
+    - name: Wait for API to be ready
+      shell: bash
+      run: |
+        echo "Waiting for API..."
+        for i in $(seq 1 30); do
+          if curl -sf http://localhost:8080/v3/api-docs > /dev/null; then
+            echo "API is ready after $((i * 5))s"
+            exit 0
+          fi
+          echo "Attempt $i/30 - retrying in 5s..."
+          sleep 5
+        done
+        echo "API did not become ready in time"
+        cd movie-catalog-api && docker compose logs --tail=100
+        exit 1

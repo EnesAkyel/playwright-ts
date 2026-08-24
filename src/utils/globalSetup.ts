@@ -9,7 +9,7 @@ async function checkConnectivity(url: string, name: string): Promise<void> {
 }
 
 export default async function globalSetup(_config: FullConfig): Promise<void> {
-    const missing = ['SAUCE_URL', 'BASE_URL'].filter(k => !process.env[k]);
+    const missing = ['BASE_URL', 'API_URL'].filter(k => !process.env[k]);
     if (missing.length) {
         throw new Error(
             `[global setup] Missing required environment variables: ${missing.join(', ')}\n` +
@@ -18,19 +18,19 @@ export default async function globalSetup(_config: FullConfig): Promise<void> {
     }
 
     await Promise.all([
-        checkConnectivity(ENV.sauceUrl, 'SauceDemo').catch(e => {
+        checkConnectivity(ENV.baseUrl, 'movie-catalog-ui').catch(e => {
             throw new Error(
-                `[global setup] SauceDemo unreachable at ${ENV.sauceUrl}: ${e.message}`,
+                `[global setup] movie-catalog-ui unreachable at ${ENV.baseUrl}: ${e.message}`,
             );
         }),
-        checkConnectivity(ENV.baseUrl, 'JSONPlaceholder').catch(e => {
+        checkConnectivity(ENV.apiUrl, 'movie-catalog-api').catch(e => {
             throw new Error(
-                `[global setup] JSONPlaceholder unreachable at ${ENV.baseUrl}: ${e.message}`,
+                `[global setup] movie-catalog-api unreachable at ${ENV.apiUrl}: ${e.message}`,
             );
         }),
     ]);
 
     console.log('[global setup] ✓ environment variables validated');
-    console.log(`[global setup] ✓ SauceDemo reachable       (${ENV.sauceUrl})`);
-    console.log(`[global setup] ✓ JSONPlaceholder reachable  (${ENV.baseUrl})`);
+    console.log(`[global setup] ✓ movie-catalog-ui reachable   (${ENV.baseUrl})`);
+    console.log(`[global setup] ✓ movie-catalog-api reachable  (${ENV.apiUrl})`);
 }
