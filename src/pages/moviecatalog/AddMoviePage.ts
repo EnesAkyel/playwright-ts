@@ -13,6 +13,7 @@ export class AddMoviePage extends BasePage {
     readonly ratingSelect: Locator;
     readonly studioInput: Locator;
     readonly submitButton: Locator;
+    readonly errorMessage: Locator;
     readonly fieldErrors: Locator;
     readonly midErrorInUse: Locator;
     readonly midErrorRequired: Locator;
@@ -29,6 +30,7 @@ export class AddMoviePage extends BasePage {
         this.ratingSelect = page.getByTestId('rating-select');
         this.studioInput = page.getByTestId('studio-input');
         this.submitButton = page.getByTestId('submit-button');
+        this.errorMessage = page.getByTestId('add-movie-error-message');
         this.fieldErrors = page.getByTestId('field-errors');
         this.midErrorInUse = page.getByTestId('mid-error-in-use');
         this.midErrorRequired = page.getByTestId('mid-error-required');

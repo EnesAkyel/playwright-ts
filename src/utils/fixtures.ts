@@ -4,7 +4,6 @@ import { LoginPage } from '../pages/moviecatalog/LoginPage';
 import { ListPage } from '../pages/moviecatalog/ListPage';
 import { AddMoviePage } from '../pages/moviecatalog/AddMoviePage';
 import { MovieDetailPage } from '../pages/moviecatalog/MovieDetailPage';
-import { ErrorPopup } from '../pages/moviecatalog/ErrorPopup';
 import { ApiClient } from './apiClient';
 import { ENV } from './env';
 
@@ -15,7 +14,6 @@ type Fixtures = {
     listPage: ListPage;
     addMoviePage: AddMoviePage;
     movieDetailPage: MovieDetailPage;
-    errorPopup: ErrorPopup;
     apiClient: ApiClient;
     loggedInContext: { context: BrowserContext; page: Page };
     loggedInPage: ListPage;
@@ -36,9 +34,6 @@ export const test = base.extend<Fixtures>({
     },
     movieDetailPage: async ({ page }, use) => {
         await use(new MovieDetailPage(page));
-    },
-    errorPopup: async ({ page }, use) => {
-        await use(new ErrorPopup(page));
     },
     apiClient: async ({}, use) => {
         const requestContext = await request.newContext();
