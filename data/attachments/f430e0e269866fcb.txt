@@ -1,0 +1,16 @@
+
+ Accessibility Violations (2)
+  [MODERATE] landmark-one-main
+    Description : Ensure the document has a main landmark
+    Help        : Document should have one main landmark
+    Nodes       : 1
+    More info   : https://dequeuniversity.com/rules/axe/4.13/landmark-one-main?application=playwright
+
+  [MODERATE] region
+    Description : Ensure all page content is contained by landmarks
+    Help        : All page content should be contained by landmarks
+    Nodes       : 10
+    More info   : https://dequeuniversity.com/rules/axe/4.13/region?application=playwright
+
+
+
