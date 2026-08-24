@@ -23,7 +23,7 @@ test.describe('Add/Edit movie', { tag: ['@regression'] }, () => {
         await expect.soft(loggedInAddMoviePage.nameErrorRequired).toBeVisible();
         await expect.soft(loggedInAddMoviePage.priceErrorRequired).toBeVisible();
         await expect.soft(loggedInAddMoviePage.studioErrorRequired).toBeVisible();
-        await expect.soft(loggedInAddMoviePage.submitButton).toBeDisabled();
+        await expect(loggedInAddMoviePage.submitButton).toBeDisabled();
     });
 
     test('server-side validation errors map to the right fields (mocked)', async ({
