@@ -22,12 +22,13 @@ async function tabUntilFocused(page: Page, testId: string, maxTabs = 40) {
 }
 
 test.describe('Cross-cutting / non-functional', { tag: ['@regression'] }, () => {
-    test('keyboard-only path through login → search → detail → back', async ({ page }) => {
+    test('keyboard-only path through login → search → detail → back', async ({ loginPage }) => {
         await epic('Non-functional');
         await feature('Keyboard accessibility');
         await story('Login, search, open a detail page, and return to the list, mouse-free');
         await severity(Severity.NORMAL);
 
+        const { page } = loginPage;
         const { username, password } = DataFactory.createCredentials();
 
         await test.step('log in via the keyboard', async () => {
