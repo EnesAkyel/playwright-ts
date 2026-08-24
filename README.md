@@ -7,7 +7,7 @@
 
 End-to-end, API, accessibility, visual regression, and performance test suite for [movie-catalog-ui](https://github.com/EnesAkyel/movie-catalog-ui) (backed by [movie-catalog-api](https://github.com/EnesAkyel/movie-catalog-api)), built with Playwright and TypeScript.
 
-> **Status:** infrastructure (fixtures, page objects, auth setup, data factory, API client) is in place; test specs are being ported in from [`docs/playwright-test-plan.md`](https://github.com/EnesAkyel/movie-catalog-ui/blob/main/docs/playwright-test-plan.md) in movie-catalog-ui, section by section.
+> **Status:** all sections of [`docs/playwright-test-plan.md`](https://github.com/EnesAkyel/movie-catalog-ui/blob/main/docs/playwright-test-plan.md) in movie-catalog-ui are implemented. Remaining work (new test-case candidates found during a full-project review, plus some cleanup/doc items) is tracked in that doc's "Full project review findings" section.
 
 ---
 
@@ -107,7 +107,7 @@ playwright-ts/
 │   │   └── boot-stack/                # start-api + build/serve movie-catalog-ui
 │   └── workflows/
 │       ├── build-api.yml              # Reusable: builds the movie-catalog-api JAR
-│       ├── playwright.yml             # PR + push: @regression (includes @smoke), sharded
+│       ├── playwright.yml             # PR + push: @regression (includes @smoke), Chromium/Firefox/WebKit matrix
 │       ├── scheduled.yml              # Nightly regression on Chromium + Firefox
 │       └── update-snapshots.yml       # Manual: regenerate Linux visual baselines
 ├── .env.local                         # Gitignored - the only env file
@@ -287,9 +287,9 @@ npx playwright install --with-deps
 ### `playwright.yml` - PR and push
 - Triggers on every pull request and push to `main`
 - `lint` job runs ESLint + Prettier check first. Blocks tests on failure
-- `test` job splits the `@regression` suite across **3 parallel shards** on Chromium
-- Each shard uploads its own Allure results and JUnit XML as artifacts
-- `allure-report` job merges all shard results, restores history from the previous run for trend charts, and uploads the generated report
+- `test` job runs the `@regression` suite (or, via manual `workflow_dispatch`, a chosen tag subset) across a **3-way browser matrix**: Chromium, Firefox, WebKit
+- Each browser uploads its own Allure results and JUnit XML as artifacts
+- `allure-report` job merges all browsers' results, restores history from the previous run for trend charts, and uploads the generated report
 
 ### `publish-report` job - GitHub Pages
 - Runs after `allure-report` on pushes to `main` only
@@ -332,7 +332,7 @@ npx playwright install --with-deps
 
 **`loggedInPage` fixture** - creates a fresh browser context with the persisted auth storageState (`.auth/moviecatalog.json`) so tests can start directly on `/list` without calling `loginPage.login()`. Requires the `auth-setup` project to have run first.
 
-**Test sharding** - the regression suite is split across 3 parallel machines in CI using `--shard=N/3`. Each shard runs independently and uploads its own results. The Allure job merges them into a single report.
+**Browser matrix, not sharding** - the regression suite runs in full against each of Chromium, Firefox, and WebKit in parallel (`strategy.matrix.browser` in `playwright.yml`), rather than being split by `--shard`. Each browser runs independently and uploads its own results. The Allure job merges them into a single report.
 
 **Allure history trending** - the `allure-report` CI job downloads the `allure-history` artifact from the previous successful push to `main`, injects it into the current results before generating, and saves the new history back. This produces Allure's built-in trend charts (pass rate, duration, flakiness) across runs without external storage.
 
