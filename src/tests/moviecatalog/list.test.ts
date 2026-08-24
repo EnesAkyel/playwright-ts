@@ -98,27 +98,31 @@ test.describe('Movie list', { tag: ['@regression'] }, () => {
         expect(response.url()).toContain('page=0');
     });
 
-    test('sort toggles direction on repeated clicks', async ({ loggedInPage }) => {
-        await epic('Movie list');
-        await feature('Sorting');
-        await story(
-            'Repeated clicks on a sort column flip direction; the other column switches ascending',
-        );
-        await severity(Severity.NORMAL);
+    test(
+        'sort toggles direction on repeated clicks',
+        { tag: ['@smoke'] },
+        async ({ loggedInPage }) => {
+            await epic('Movie list');
+            await feature('Sorting');
+            await story(
+                'Repeated clicks on a sort column flip direction; the other column switches ascending',
+            );
+            await severity(Severity.NORMAL);
 
-        // sortColumn defaults to 'mid' ascending, so the arrow is already showing
-        await expect(loggedInPage.sortArrow('mid')).toHaveText('▲');
+            // sortColumn defaults to 'mid' ascending, so the arrow is already showing
+            await expect(loggedInPage.sortArrow('mid')).toHaveText('▲');
 
-        await loggedInPage.sortByMid.click();
-        await expect(loggedInPage.sortArrow('mid')).toHaveText('▼');
+            await loggedInPage.sortByMid.click();
+            await expect(loggedInPage.sortArrow('mid')).toHaveText('▼');
 
-        await loggedInPage.sortByMid.click();
-        await expect(loggedInPage.sortArrow('mid')).toHaveText('▲');
+            await loggedInPage.sortByMid.click();
+            await expect(loggedInPage.sortArrow('mid')).toHaveText('▲');
 
-        await loggedInPage.sortByName.click();
-        await expect(loggedInPage.sortArrow('name')).toHaveText('▲');
-        await expect(loggedInPage.sortArrow('mid')).toBeHidden();
-    });
+            await loggedInPage.sortByName.click();
+            await expect(loggedInPage.sortArrow('name')).toHaveText('▲');
+            await expect(loggedInPage.sortArrow('mid')).toBeHidden();
+        },
+    );
 
     test('pagination buttons disable at both boundaries (mocked)', async ({ loggedInContext }) => {
         await epic('Movie list');

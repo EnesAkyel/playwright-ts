@@ -9,6 +9,7 @@ export class MovieDetailPage extends BasePage {
     readonly confirmDeleteYes: Locator;
     readonly confirmDeleteNo: Locator;
     readonly errorMessage: Locator;
+    readonly listLink: Locator;
 
     constructor(page: Page) {
         super(page);
@@ -18,6 +19,7 @@ export class MovieDetailPage extends BasePage {
         this.confirmDeleteYes = page.getByTestId('confirm-delete-yes');
         this.confirmDeleteNo = page.getByTestId('confirm-delete-no');
         this.errorMessage = page.getByRole('alert');
+        this.listLink = page.getByTestId('list-link').first();
     }
 
     async open(mid: number | string) {

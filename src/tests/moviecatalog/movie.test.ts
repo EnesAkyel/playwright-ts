@@ -71,33 +71,35 @@ test.describe('Add/Edit movie', { tag: ['@regression'] }, () => {
         await expect(loggedInAddMoviePage.studioInput).toHaveValue(String(movie.studio));
     });
 
-    test('successful add navigates to the list with a success banner', async ({
-        loggedInAddMoviePage,
-    }) => {
-        await epic('Add/Edit movie');
-        await feature('Create');
-        await story('A valid submit redirects to the list and shows a success banner');
-        await severity(Severity.CRITICAL);
+    test(
+        'successful add navigates to the list with a success banner',
+        { tag: ['@smoke'] },
+        async ({ loggedInAddMoviePage }) => {
+            await epic('Add/Edit movie');
+            await feature('Create');
+            await story('A valid submit redirects to the list and shows a success banner');
+            await severity(Severity.CRITICAL);
 
-        const movie = DataFactory.createMovie();
-        await loggedInAddMoviePage.fill(movie);
+            const movie = DataFactory.createMovie();
+            await loggedInAddMoviePage.fill(movie);
 
-        await test.step('submit and await the real POST', async () => {
-            const [response] = await Promise.all([
-                loggedInAddMoviePage.page.waitForResponse(
-                    resp => resp.url().endsWith('/movie') && resp.request().method() === 'POST',
-                ),
-                loggedInAddMoviePage.submit(),
-            ]);
-            expect(response.ok()).toBeTruthy();
-        });
+            await test.step('submit and await the real POST', async () => {
+                const [response] = await Promise.all([
+                    loggedInAddMoviePage.page.waitForResponse(
+                        resp => resp.url().endsWith('/movie') && resp.request().method() === 'POST',
+                    ),
+                    loggedInAddMoviePage.submit(),
+                ]);
+                expect(response.ok()).toBeTruthy();
+            });
 
-        await test.step('redirects to the list with a success banner', async () => {
-            await expect(loggedInAddMoviePage.page).toHaveURL(/\/list$/);
-            const listPage = new ListPage(loggedInAddMoviePage.page);
-            await expect(listPage.listSuccessMessage).toHaveText(/Movie added successfully\./);
-        });
-    });
+            await test.step('redirects to the list with a success banner', async () => {
+                await expect(loggedInAddMoviePage.page).toHaveURL(/\/list$/);
+                const listPage = new ListPage(loggedInAddMoviePage.page);
+                await expect(listPage.listSuccessMessage).toHaveText(/Movie added successfully\./);
+            });
+        },
+    );
 
     test('edit mode pre-fills the form and locks the MID', async ({
         loggedInContext,
