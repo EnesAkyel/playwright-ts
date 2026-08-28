@@ -7,8 +7,6 @@
 
 End-to-end, API, accessibility, visual regression, and performance test suite for [movie-catalog-ui](https://github.com/EnesAkyel/movie-catalog-ui) (backed by [movie-catalog-api](https://github.com/EnesAkyel/movie-catalog-api)), built with Playwright and TypeScript.
 
-> **Status:** all sections of [`docs/playwright-test-plan.md`](https://github.com/EnesAkyel/movie-catalog-ui/blob/main/docs/playwright-test-plan.md) in movie-catalog-ui are implemented. Remaining work (new test-case candidates found during a full-project review, plus some cleanup/doc items) is tracked in that doc's "Full project review findings" section.
-
 ---
 
 ## Table of Contents
