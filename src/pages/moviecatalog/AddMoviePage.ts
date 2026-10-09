@@ -60,10 +60,17 @@ export class AddMoviePage extends BasePage {
         await this.submitButton.click();
     }
 
-    async touchAllFieldsWithoutFilling() {
-        for (const locator of [this.midInput, this.nameInput, this.priceInput, this.studioInput]) {
-            await locator.click();
-            await locator.press('Tab');
-        }
+    async touchAllFieldsWithoutFilling(): Promise<void> {
+        await this.midInput.click();
+        await this.midInput.press('Tab');
+
+        await this.nameInput.click();
+        await this.nameInput.press('Tab');
+
+        await this.priceInput.click();
+        await this.priceInput.press('Tab');
+
+        await this.studioInput.click();
+        await this.studioInput.press('Tab');
     }
 }
