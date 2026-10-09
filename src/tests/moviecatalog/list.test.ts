@@ -19,6 +19,16 @@ function moviesPage(overrides: {
     };
 }
 
+async function mockMoviesEndpoint(context: BrowserContext): Promise<void> {
+    await context.route('**/movies*', route =>
+        route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(moviesPage({ totalPages: 3, totalElements: 25 })),
+        }),
+    );
+}
+
 test.describe('Movie list', { tag: ['@regression'] }, () => {
     test('search is debounced to a single request', async ({ loggedInPage }) => {
         await epic('Movie list');
@@ -74,13 +84,7 @@ test.describe('Movie list', { tag: ['@regression'] }, () => {
         await severity(Severity.NORMAL);
 
         const { context, page } = loggedInContext;
-        await context.route('**/movies*', route =>
-            route.fulfill({
-                status: 200,
-                contentType: 'application/json',
-                body: JSON.stringify(moviesPage({ totalPages: 3, totalElements: 25 })),
-            }),
-        );
+        await mockMoviesEndpoint(context);
 
         const listPage = new ListPage(page);
         await listPage.open();
@@ -131,13 +135,7 @@ test.describe('Movie list', { tag: ['@regression'] }, () => {
         await severity(Severity.NORMAL);
 
         const { context, page } = loggedInContext;
-        await context.route('**/movies*', route =>
-            route.fulfill({
-                status: 200,
-                contentType: 'application/json',
-                body: JSON.stringify(moviesPage({ totalPages: 3, totalElements: 25 })),
-            }),
-        );
+        await mockMoviesEndpoint(context);
 
         const listPage = new ListPage(page);
         await listPage.open();
