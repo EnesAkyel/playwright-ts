@@ -28,7 +28,7 @@ export class LoginPage extends BasePage {
         await this.loginSubmit.click();
     }
 
-    async getErrorMessage(): Promise<string> {
+    getErrorMessage(): Promise<string> {
         return this.errorMessage.innerText();
     }
 
@@ -43,7 +43,7 @@ export class LoginPage extends BasePage {
         }
     }
 
-    async isSubmitDisabled(): Promise<boolean> {
+    isSubmitDisabled(): Promise<boolean> {
         return this.loginSubmit.isDisabled();
     }
 }
